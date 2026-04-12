@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
-		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net9.0-ios;net10.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net10.0-windows10.0.19041.0</TargetFrameworks>
 
 		<!-- Note for MacCatalyst:
@@ -18,6 +18,7 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<CheckEolTargetFramework>false</CheckEolTargetFramework>
 
 		<!-- Display name -->
 		<ApplicationTitle>FastTrack</ApplicationTitle>
@@ -61,16 +62,20 @@
 	  <None Include=".github\workflows\build-ios.yml" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) != 'v8.0'">
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETCoreApp' Or $([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) != 'v9.0'">
+	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == 'v8.0'">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="8.0.100" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) != '.NETCoreApp' Or $([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) != 'v8.0'">
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == 'v9.0'">
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
+	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == 'v8.0'">
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
 	</ItemGroup>
 
 </Project>

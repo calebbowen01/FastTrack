@@ -18,26 +18,21 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '9.0.203'
+        dotnet-version: '8.0.x'
 
     - name: Install MAUI Workloads
-      run: |
-        dotnet workload install maui-ios maui-android maui-tizen --skip-manifest-update
-        dotnet workload list
-
-    - name: Pin SDK for iOS build
-      run: cp global.json.ci global.json
+      run: dotnet workload install maui
 
     - name: Build iOS IPA
       run: |
-        dotnet publish -f net9.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false -p:TargetFrameworks=net9.0-ios -p:SkipValidatePackageReferences=true
+        dotnet publish -f net8.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false -p:TargetFrameworks=net8.0-ios
 
     - name: Find IPA
       run: |
         find . -name "*.ipa" -o -name "*.app" | head -20
-        ls -la bin/Release/net9.0-ios/ || true
-        ls -la bin/Release/net9.0-ios/ios-arm64/ || true
-        ls -la bin/Release/net9.0-ios/ios-arm64/publish/ || true
+        ls -la bin/Release/net8.0-ios/ || true
+        ls -la bin/Release/net8.0-ios/ios-arm64/ || true
+        ls -la bin/Release/net8.0-ios/ios-arm64/publish/ || true
 
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v5
