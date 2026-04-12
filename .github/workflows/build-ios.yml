@@ -51,17 +51,30 @@ jobs:
 
     - name: Patch Xcode version check
       run: |
-        # The iOS SDK 26.2 strictly requires Xcode 26.2 but the runner has 26.3.
-        # Downgrade the hard error to a warning so the build can proceed.
+        # The iOS SDK may strictly require a specific Xcode minor version.
+        # Downgrade the hard error to a warning so the build can proceed
+        # when the runner has a compatible but newer Xcode (e.g. 26.3 vs 26.2).
         find $HOME/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" | while read f; do
           echo "=== Patching: $f ==="
-          # Show what we're dealing with
-          grep -n "Xcode\|_RequiredXcode" "$f" | head -10
-          # The <Error> element's Condition references _RequiredXcodeVersion — patch that line
-          sed -i '' '/_RequiredXcodeVersion/s/<Error/<Warning/g' "$f"
-          # Also patch by known line number as fallback
-          sed -i '' '2374s/<Error/<Warning/' "$f"
-          echo "Patch complete for: $f"
+          # Use perl in slurp mode (-0777) to handle <Error ...> elements that
+          # span multiple lines before mentioning "requires Xcode".
+          perl -0777 -pi -e 's/<Error(\s+(?:(?!<Error|<Warning).)*?requires\s+Xcode)/<Warning$1/gsi' "$f"
+          # Verify
+          if perl -0777 -ne 'print "found" if /<Warning\s+(?:(?!<Error|<Warning).)*?requires\s+Xcode/si' "$f" | grep -q found; then
+            echo "✅ Patch verified for: $f"
+          else
+            echo "⚠️  Slurp match failed, trying line-range fallback..."
+            # Fallback: find the line with "requires Xcode" and patch <Error
+            # in a 10-line window above it (handles multi-line XML elements).
+            LINE=$(grep -n 'requires Xcode' "$f" | head -1 | cut -d: -f1)
+            if [ -n "$LINE" ]; then
+              START=$((LINE - 10)); [ $START -lt 1 ] && START=1
+              sed -i '' "${START},${LINE}s/<Error/<Warning/" "$f"
+              echo "✅ Fallback patch applied near line $LINE"
+            else
+              echo "❌ Could not locate Xcode version check in: $f"
+            fi
+          fi
         done
 
     - name: Build iOS IPA
