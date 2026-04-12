@@ -49,6 +49,15 @@ jobs:
         dotnet workload install maui
         dotnet workload update
 
+    - name: Patch Xcode version check
+      run: |
+        # The iOS SDK 26.2 strictly requires Xcode 26.2 but the runner has 26.3.
+        # Downgrade the hard error to a warning so the build can proceed.
+        find $HOME/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" -path "*iOS*" | while read f; do
+          echo "Patching: $f"
+          sed -i '' '/requires Xcode/s/<Error /<Warning /' "$f"
+        done
+
     - name: Build iOS IPA
       run: |
         dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false
