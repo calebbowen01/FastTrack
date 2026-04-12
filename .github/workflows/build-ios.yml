@@ -19,11 +19,8 @@ jobs:
       run: |
         echo "Available Xcode versions:"
         ls -d /Applications/Xcode* || true
-        # Prefer Xcode 26.2 (matches .NET 10 iOS SDK), fall back to lowest 26.x
-        XCODE=$(ls -d /Applications/Xcode_26.2* 2>/dev/null | head -1)
-        if [ -z "$XCODE" ]; then
-          XCODE=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | head -1)
-        fi
+        # Select the latest Xcode 26.x available on the runner
+        XCODE=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1)
         if [ -n "$XCODE" ]; then
           sudo xcode-select -s "$XCODE/Contents/Developer"
           echo "Selected: $XCODE"
