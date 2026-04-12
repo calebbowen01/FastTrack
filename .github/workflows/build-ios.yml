@@ -22,7 +22,7 @@ jobs:
 
     - name: Install MAUI Workloads
       run: |
-        dotnet workload install ios maui-ios android maui-android --skip-manifest-update || true
+        dotnet workload install maui-ios maui-android maui-tizen --skip-manifest-update
         dotnet workload list
 
     - name: Pin SDK for iOS build
