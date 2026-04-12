@@ -15,15 +15,16 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - name: Pin to .NET 8 SDK
+    - name: Pin to .NET 10 SDK
       run: |
         cp global.json.ci global.json
         cat global.json
 
-    - name: Setup .NET 8
+    - name: Setup .NET 10
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+        dotnet-quality: 'preview'
 
     - name: Verify SDK version
       run: dotnet --version
@@ -33,14 +34,14 @@ jobs:
 
     - name: Build iOS IPA
       run: |
-        dotnet publish -f net8.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false -p:TargetFrameworks=net8.0-ios -p:CheckEolTargetFramework=false
+        dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false
 
     - name: Find IPA
       run: |
         find . -name "*.ipa" -o -name "*.app" | head -20
-        ls -la bin/Release/net8.0-ios/ || true
-        ls -la bin/Release/net8.0-ios/ios-arm64/ || true
-        ls -la bin/Release/net8.0-ios/ios-arm64/publish/ || true
+        ls -la bin/Release/net10.0-ios/ || true
+        ls -la bin/Release/net10.0-ios/ios-arm64/ || true
+        ls -la bin/Release/net10.0-ios/ios-arm64/publish/ || true
 
     - name: Upload IPA Artifact
       uses: actions/upload-artifact@v5
