@@ -20,8 +20,8 @@ jobs:
       with:
         dotnet-version: '9.0.203'
 
-    - name: Install MAUI Workload
-      run: dotnet workload install maui-ios --skip-manifest-update
+    - name: Install MAUI Workloads
+      run: dotnet workload install maui --skip-manifest-update
 
     - name: Pin SDK for iOS build
       run: cp global.json.ci global.json
