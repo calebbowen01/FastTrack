@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
+             x:Class="MyMauiApp.Pages.DashboardPage"
+             x:DataType="vm:DashboardViewModel"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,20" Spacing="16">
+
+            <!-- Header -->
+            <Label Text="{Binding Greeting}"
+                   FontSize="28" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+            <Label Text="{Binding TodayDate}"
+                   FontSize="14" TextColor="{StaticResource Gray300}"
+                   Margin="0,-10,0,0" />
+
+            <!-- Fasting Status Card -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                    <Label Text="🔥 Fasting Status" FontSize="13"
+                           TextColor="{StaticResource Gray300}" Grid.ColumnSpan="2" />
+
+                    <Label Grid.Row="1" Text="{Binding FastingStatus}"
+                           FontSize="22" FontAttributes="Bold"
+                           TextColor="{Binding FastingStatusColor}" />
+
+                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding FastingElapsed}"
+                           FontSize="22" FontAttributes="Bold"
+                           TextColor="{StaticResource White}"
+                           VerticalOptions="Center" />
+
+                    <Label Grid.Row="2" Text="{Binding FastingPlan}"
+                           FontSize="13" TextColor="{StaticResource Gray400}"
+                           Grid.ColumnSpan="2" />
+
+                    <ProgressBar Grid.Row="3" Grid.ColumnSpan="2"
+                                 Progress="{Binding FastingProgress}"
+                                 ProgressColor="{StaticResource Accent}"
+                                 BackgroundColor="{StaticResource CardBackgroundAlt}"
+                                 HeightRequest="6" />
+                </Grid>
+            </Frame>
+
+            <!-- Calories Card -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*,*" RowSpacing="10">
+                    <Label Text="🍽️ Calories Today" FontSize="13"
+                           TextColor="{StaticResource Gray300}" Grid.ColumnSpan="3" />
+
+                    <StackLayout Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="4">
+                        <Label Text="{Binding TodayCalories}"
+                               FontSize="30" FontAttributes="Bold"
+                               TextColor="{StaticResource White}" />
+                        <Label Text="{Binding CalorieGoal, StringFormat='/ {0} kcal'}"
+                               FontSize="14" TextColor="{StaticResource Gray400}"
+                               VerticalOptions="End" Margin="0,0,0,4" />
+                    </StackLayout>
+
+                    <Label Grid.Row="1" Grid.Column="2"
+                           Text="{Binding CaloriesRemaining, StringFormat='{0} left'}"
+                           FontSize="14" TextColor="{StaticResource Accent}"
+                           HorizontalOptions="End" VerticalOptions="End" Margin="0,0,0,4" />
+
+                    <ProgressBar Grid.Row="2" Grid.ColumnSpan="3"
+                                 Progress="{Binding CalorieProgress}"
+                                 ProgressColor="{StaticResource AccentOrange}"
+                                 BackgroundColor="{StaticResource CardBackgroundAlt}"
+                                 HeightRequest="6" />
+
+                    <!-- Macro Summary -->
+                    <StackLayout Grid.Row="3" Grid.Column="0" Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TodayProtein, StringFormat='{0:F0}g'}"
+                               FontSize="16" FontAttributes="Bold" TextColor="{StaticResource AccentBlue}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Protein" FontSize="11" TextColor="{StaticResource Gray400}"
+                               HorizontalOptions="Center" />
+                    </StackLayout>
+                    <StackLayout Grid.Row="3" Grid.Column="1" Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TodayCarbs, StringFormat='{0:F0}g'}"
+                               FontSize="16" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Carbs" FontSize="11" TextColor="{StaticResource Gray400}"
+                               HorizontalOptions="Center" />
+                    </StackLayout>
+                    <StackLayout Grid.Row="3" Grid.Column="2" Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TodayFat, StringFormat='{0:F0}g'}"
+                               FontSize="16" FontAttributes="Bold" TextColor="{StaticResource AccentRed}"
+                               HorizontalOptions="Center" />
+                        <Label Text="Fat" FontSize="11" TextColor="{StaticResource Gray400}"
+                               HorizontalOptions="Center" />
+                    </StackLayout>
+                </Grid>
+            </Frame>
+
+            <!-- Water Card -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                    <Label Text="💧 Water Intake" FontSize="13"
+                           TextColor="{StaticResource Gray300}" Grid.ColumnSpan="2" />
+
+                    <Label Grid.Row="1" Text="{Binding WaterDisplay}"
+                           FontSize="22" FontAttributes="Bold"
+                           TextColor="{StaticResource AccentCyan}" />
+
+                    <Label Grid.Row="1" Grid.Column="1"
+                           Text="{Binding WaterProgress, StringFormat='{0:P0}'}"
+                           FontSize="18" TextColor="{StaticResource Gray300}"
+                           VerticalOptions="Center" />
+
+                    <ProgressBar Grid.Row="2" Grid.ColumnSpan="2"
+                                 Progress="{Binding WaterProgress}"
+                                 ProgressColor="{StaticResource AccentCyan}"
+                                 BackgroundColor="{StaticResource CardBackgroundAlt}"
+                                 HeightRequest="6" />
+                </Grid>
+            </Frame>
+
+            <!-- Streak Card -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False">
+                <HorizontalStackLayout Spacing="12">
+                    <Label Text="🔥" FontSize="32" VerticalOptions="Center" />
+                    <StackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="{Binding FastingStreak, StringFormat='{0} Day Streak'}"
+                               FontSize="20" FontAttributes="Bold"
+                               TextColor="{StaticResource White}" />
+                        <Label Text="Keep going! Consistency is key."
+                               FontSize="12" TextColor="{StaticResource Gray400}" />
+                    </StackLayout>
+                </HorizontalStackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

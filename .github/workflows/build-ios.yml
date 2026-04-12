@@ -1,0 +1,42 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+        dotnet-quality: 'preview'
+
+    - name: Install MAUI Workload
+      run: dotnet workload install maui-ios
+
+    - name: Build iOS IPA
+      run: |
+        dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false
+
+    - name: Find IPA
+      run: |
+        find . -name "*.ipa" -o -name "*.app" | head -20
+        ls -la bin/Release/net10.0-ios/ || true
+        ls -la bin/Release/net10.0-ios/ios-arm64/ || true
+        ls -la bin/Release/net10.0-ios/ios-arm64/publish/ || true
+
+    - name: Upload IPA Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: FastTrack-iOS
+        path: |
+          **/*.ipa
+          **/publish/*.app
+        if-no-files-found: warn

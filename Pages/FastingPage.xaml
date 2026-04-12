@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
+             x:Class="MyMauiApp.Pages.FastingPage"
+             x:DataType="vm:FastingViewModel"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,20" Spacing="16">
+
+            <Label Text="Intermittent Fasting"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <!-- Timer Card (Active Fast) -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="20" Padding="24" BorderColor="Transparent"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="12" HorizontalOptions="Center">
+                    <Label Text="{Binding ElapsedDisplay}"
+                           FontSize="52" FontAttributes="Bold"
+                           TextColor="{StaticResource Accent}"
+                           HorizontalOptions="Center" />
+
+                    <Label Text="{Binding ProgressPercent}"
+                           FontSize="18" TextColor="{StaticResource Gray300}"
+                           HorizontalOptions="Center" />
+
+                    <ProgressBar Progress="{Binding Progress}"
+                                 ProgressColor="{StaticResource Accent}"
+                                 BackgroundColor="{StaticResource CardBackgroundAlt}"
+                                 HeightRequest="8"
+                                 Margin="0,4" />
+
+                    <Label Text="{Binding RemainingDisplay}"
+                           FontSize="14" TextColor="{StaticResource Gray400}"
+                           HorizontalOptions="Center" />
+
+                    <!-- Start/End times -->
+                    <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsFasting}">
+                        <StackLayout HorizontalOptions="Center" Spacing="2">
+                            <Label Text="Started" FontSize="11" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
+                            <Label Text="{Binding StartTimeDisplay}" FontSize="14" TextColor="{StaticResource White}" HorizontalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="2">
+                            <Label Text="Goal" FontSize="11" TextColor="{StaticResource Gray500}" HorizontalOptions="Center" />
+                            <Label Text="{Binding EndTimeEstimate}" FontSize="14" TextColor="{StaticResource White}" HorizontalOptions="Center" />
+                        </StackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Plan Picker (when not fasting) -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False"
+                   IsVisible="{Binding IsNotFasting}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Select Fasting Plan" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource White}" />
+                    <Picker Title="Choose a plan"
+                            ItemsSource="{Binding Plans}"
+                            ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding SelectedPlan}"
+                            TextColor="{StaticResource White}"
+                            TitleColor="{StaticResource Gray400}"
+                            BackgroundColor="{StaticResource CardBackgroundAlt}"
+                            Margin="0,4" />
+                    <Label Text="{Binding SelectedPlan.Description}"
+                           FontSize="12" TextColor="{StaticResource Gray400}" />
+
+                    <!-- Custom Hours Input -->
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                          IsVisible="{Binding IsCustomPlan}" Margin="0,6,0,0">
+                        <StackLayout Spacing="4">
+                            <Label Text="Fasting Hours" FontSize="12" TextColor="{StaticResource Gray300}" />
+                            <Entry Placeholder="e.g. 16" Text="{Binding CustomFastingHours}"
+                                   Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource Accent}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Eating Hours" FontSize="12" TextColor="{StaticResource Gray300}" />
+                            <Entry Placeholder="e.g. 8" Text="{Binding CustomEatingHours}"
+                                   Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource AccentOrange}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Start/Stop Buttons -->
+            <Button Text="Start Fasting"
+                    Command="{Binding StartFastCommand}"
+                    IsVisible="{Binding IsNotFasting}"
+                    BackgroundColor="{StaticResource Accent}"
+                    TextColor="{StaticResource Black}"
+                    FontAttributes="Bold" FontSize="17"
+                    CornerRadius="14" HeightRequest="52"
+                    Margin="0,4" />
+
+            <Button Text="End Fast"
+                    Command="{Binding StopFastCommand}"
+                    IsVisible="{Binding IsFasting}"
+                    BackgroundColor="{StaticResource AccentRed}"
+                    TextColor="{StaticResource White}"
+                    FontAttributes="Bold" FontSize="17"
+                    CornerRadius="14" HeightRequest="52"
+                    Margin="0,4" />
+
+            <!-- Streak -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="16" BorderColor="Transparent"
+                   HasShadow="False">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="🔥" FontSize="24" VerticalOptions="Center" />
+                    <Label Text="{Binding Streak, StringFormat='{0} Day Streak'}"
+                           FontSize="17" FontAttributes="Bold"
+                           TextColor="{StaticResource White}" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- History -->
+            <Label Text="Recent Fasts" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" Margin="0,8,0,0" />
+
+            <CollectionView ItemsSource="{Binding History}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No fasting history yet. Start your first fast!"
+                           TextColor="{StaticResource Gray500}" FontSize="13"
+                           HorizontalOptions="Center" Margin="0,10" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:Object">
+                        <Frame BackgroundColor="{StaticResource CardBackgroundAlt}"
+                               CornerRadius="12" Padding="14" Margin="0,4"
+                               BorderColor="Transparent" HasShadow="False">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="4">
+                                <Label Text="{Binding PlanName}"
+                                       FontSize="15" FontAttributes="Bold"
+                                       TextColor="{StaticResource White}" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding Elapsed, StringFormat='{0:hh\\:mm\\:ss}'}"
+                                       FontSize="15" TextColor="{StaticResource Accent}" />
+                                <Label Grid.Row="1"
+                                       Text="{Binding StartTime, StringFormat='{0:MMM d, h:mm tt}'}"
+                                       FontSize="12" TextColor="{StaticResource Gray400}" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

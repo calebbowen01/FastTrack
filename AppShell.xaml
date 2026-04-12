@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="MyMauiApp.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:pages="clr-namespace:MyMauiApp.Pages"
+    Title="FastTrack"
+    Shell.FlyoutBehavior="Flyout"
+    Shell.FlyoutBackgroundColor="#0D0D14"
+    Shell.ForegroundColor="#00C853"
+    Shell.TitleColor="#FFFFFF"
+    Shell.BackgroundColor="#0D0D14"
+    FlyoutWidth="280">
+
+    <!-- Flyout Header -->
+    <Shell.FlyoutHeader>
+        <VerticalStackLayout Padding="20,40,20,20" BackgroundColor="#111118">
+            <Label Text="🏋️ FastTrack" FontSize="26" FontAttributes="Bold" TextColor="#00C853" />
+            <Label Text="Fasting &amp; Fitness Tracker" FontSize="13" TextColor="#919191" Margin="0,4,0,0" />
+            <BoxView HeightRequest="1" Color="#222240" Margin="0,16,0,0" />
+        </VerticalStackLayout>
+    </Shell.FlyoutHeader>
+
+    <FlyoutItem Title="Dashboard" Icon="home.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:DashboardPage}" Route="Dashboard" />
+    </FlyoutItem>
+    <FlyoutItem Title="Fasting" Icon="timer.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:FastingPage}" Route="Fasting" />
+    </FlyoutItem>
+    <FlyoutItem Title="Calories" Icon="food.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:CaloriesPage}" Route="Calories" />
+    </FlyoutItem>
+    <FlyoutItem Title="Water" Icon="water.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:WaterPage}" Route="Water" />
+    </FlyoutItem>
+    <FlyoutItem Title="Profile" Icon="profile.png">
+        <ShellContent ContentTemplate="{DataTemplate pages:ProfilePage}" Route="Profile" />
+    </FlyoutItem>
+
+    <!-- Style the flyout menu items -->
+    <Shell.ItemTemplate>
+        <DataTemplate>
+            <Grid ColumnDefinitions="Auto,*" Padding="16,12" ColumnSpacing="14" BackgroundColor="Transparent">
+                <Image Source="{Binding FlyoutIcon}" HeightRequest="22" WidthRequest="22"
+                       VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="{Binding Title}"
+                       FontSize="16" TextColor="#FFFFFF"
+                       VerticalOptions="Center" />
+            </Grid>
+        </DataTemplate>
+    </Shell.ItemTemplate>
+
+</Shell>

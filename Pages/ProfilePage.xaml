@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
+             x:Class="MyMauiApp.Pages.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,20" Spacing="16">
+
+            <Label Text="Profile &amp; Settings"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <!-- Stats Overview -->
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Frame BackgroundColor="{StaticResource CardBackground}"
+                       CornerRadius="16" Padding="18" BorderColor="Transparent" HasShadow="False">
+                    <StackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="🔥" FontSize="28" HorizontalOptions="Center" />
+                        <Label Text="{Binding FastingStreak, StringFormat='{0}'}"
+                               FontSize="28" FontAttributes="Bold"
+                               TextColor="{StaticResource Accent}" HorizontalOptions="Center" />
+                        <Label Text="Day Streak" FontSize="12"
+                               TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                    </StackLayout>
+                </Frame>
+                <Frame Grid.Column="1" BackgroundColor="{StaticResource CardBackground}"
+                       CornerRadius="16" Padding="18" BorderColor="Transparent" HasShadow="False">
+                    <StackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="✅" FontSize="28" HorizontalOptions="Center" />
+                        <Label Text="{Binding TotalFasts, StringFormat='{0}'}"
+                               FontSize="28" FontAttributes="Bold"
+                               TextColor="{StaticResource AccentBlue}" HorizontalOptions="Center" />
+                        <Label Text="Total Fasts" FontSize="12"
+                               TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                    </StackLayout>
+                </Frame>
+            </Grid>
+
+            <!-- Goals Settings -->
+            <Label Text="Goals" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" Margin="0,8,0,0" />
+
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="14">
+                    <StackLayout Spacing="4">
+                        <Label Text="Daily Calorie Goal (kcal)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                        <Entry Text="{Binding CalorieGoalText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+
+                    <StackLayout Spacing="4">
+                        <Label Text="Daily Water Goal (ml)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                        <Entry Text="{Binding WaterGoalText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+
+                    <StackLayout Spacing="4">
+                        <Label Text="Current Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                        <Entry Text="{Binding WeightText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+
+                    <StackLayout Spacing="4">
+                        <Label Text="Goal Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                        <Entry Text="{Binding GoalWeightText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+
+                    <Button Text="Save Settings"
+                            Command="{Binding SaveCommand}"
+                            BackgroundColor="{StaticResource Accent}"
+                            TextColor="{StaticResource Black}"
+                            FontAttributes="Bold" FontSize="16"
+                            CornerRadius="12" HeightRequest="48" />
+
+                    <Label Text="{Binding StatusMessage}"
+                           FontSize="13" TextColor="{StaticResource Accent}"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Reset -->
+            <Button Text="Reset All Data"
+                    Command="{Binding ResetDataCommand}"
+                    BackgroundColor="{StaticResource CardBackgroundAlt}"
+                    TextColor="{StaticResource AccentRed}"
+                    FontSize="14" CornerRadius="12"
+                    HeightRequest="44"
+                    Margin="0,10,0,0" />
+
+            <Label Text="FastTrack v1.0 — Built with .NET MAUI"
+                   FontSize="11" TextColor="{StaticResource Gray600}"
+                   HorizontalOptions="Center" Margin="0,20,0,0" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

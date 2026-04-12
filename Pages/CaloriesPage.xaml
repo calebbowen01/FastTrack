@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
+             xmlns:models="clr-namespace:MyMauiApp.Models"
+             x:Class="MyMauiApp.Pages.CaloriesPage"
+             x:DataType="vm:CaloriesViewModel"
+             BackgroundColor="{StaticResource PageBackground}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,16,20,20" Spacing="16">
+
+            <Label Text="Calorie Tracker"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <!-- Progress Summary Card -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent"
+                   HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding CalorieProgressText}"
+                           FontSize="22" FontAttributes="Bold"
+                           TextColor="{StaticResource White}" HorizontalOptions="Center" />
+
+                    <ProgressBar Progress="{Binding CalorieProgress}"
+                                 ProgressColor="{StaticResource AccentOrange}"
+                                 BackgroundColor="{StaticResource CardBackgroundAlt}"
+                                 HeightRequest="8" />
+
+                    <Label Text="{Binding CaloriesRemaining, StringFormat='{0} kcal remaining'}"
+                           FontSize="13" TextColor="{StaticResource Accent}"
+                           HorizontalOptions="Center" />
+
+                    <!-- Macros -->
+                    <Grid ColumnDefinitions="*,*,*" Margin="0,6,0,0">
+                        <StackLayout HorizontalOptions="Center" Spacing="2">
+                            <Label Text="{Binding TodayProtein, StringFormat='{0:F0}g'}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentBlue}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Protein" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="2">
+                            <Label Text="{Binding TodayCarbs, StringFormat='{0:F0}g'}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Carbs" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="2">
+                            <Label Text="{Binding TodayFat, StringFormat='{0:F0}g'}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentRed}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="Fat" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                        </StackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Meal Type Picker -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="12" Padding="14" BorderColor="Transparent" HasShadow="False">
+                <HorizontalStackLayout Spacing="10">
+                    <Label Text="Meal:" FontSize="14" TextColor="{StaticResource Gray300}" VerticalOptions="Center" />
+                    <Picker ItemsSource="{Binding MealTypes}"
+                            SelectedItem="{Binding SelectedMealType}"
+                            TextColor="{StaticResource White}"
+                            TitleColor="{StaticResource Gray400}"
+                            BackgroundColor="Transparent"
+                            VerticalOptions="Center"
+                            HorizontalOptions="FillAndExpand" />
+                </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Quick Add Section -->
+            <Label Text="⚡ Quick Add" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="16" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Entry Placeholder="Food name" Text="{Binding QuickName}"
+                           PlaceholderColor="{StaticResource Gray500}"
+                           TextColor="{StaticResource White}"
+                           BackgroundColor="{StaticResource CardBackgroundAlt}"
+                           Margin="0" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Entry Placeholder="Calories" Text="{Binding QuickCalories}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Button Grid.Column="1" Text="Add"
+                                Command="{Binding QuickAddCommand}"
+                                BackgroundColor="{StaticResource Accent}"
+                                TextColor="{StaticResource Black}"
+                                FontAttributes="Bold" CornerRadius="10"
+                                HeightRequest="44" WidthRequest="80" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Manual Macros Section -->
+            <Label Text="📊 Add by Macros" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="16" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Entry Placeholder="Food name" Text="{Binding MacroName}"
+                           PlaceholderColor="{StaticResource Gray500}"
+                           TextColor="{StaticResource White}"
+                           BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Entry Placeholder="Protein (g)" Text="{Binding MacroProtein}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentBlue}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Entry Grid.Column="1" Placeholder="Carbs (g)" Text="{Binding MacroCarbs}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentOrange}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Entry Grid.Column="2" Placeholder="Fat (g)" Text="{Binding MacroFat}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentRed}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </Grid>
+                    <Button Text="Add from Macros"
+                            Command="{Binding MacroAddCommand}"
+                            BackgroundColor="{StaticResource AccentBlue}"
+                            TextColor="{StaticResource White}"
+                            FontAttributes="Bold" CornerRadius="10"
+                            HeightRequest="44" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Meal Presets -->
+            <Label Text="🍽️ Meal Presets" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+            <CollectionView ItemsSource="{Binding Presets}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MealPreset">
+                        <Frame BackgroundColor="{StaticResource CardBackgroundAlt}"
+                               CornerRadius="12" Padding="12" Margin="0,3"
+                               BorderColor="Transparent" HasShadow="False">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding Icon}" FontSize="28" VerticalOptions="Center" />
+                                <StackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
+                                           TextColor="{StaticResource White}" />
+                                    <Label FontSize="11" TextColor="{StaticResource Gray400}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Calories, StringFormat='{0} kcal'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding ProteinGrams, StringFormat='P:{0:F0}g'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding CarbsGrams, StringFormat='C:{0:F0}g'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding FatGrams, StringFormat='F:{0:F0}g'}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </StackLayout>
+                                <Button Grid.Column="2" Text="+"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CaloriesViewModel}}, Path=PresetAddCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="{StaticResource Accent}"
+                                        TextColor="{StaticResource Black}"
+                                        FontAttributes="Bold" CornerRadius="8"
+                                        WidthRequest="40" HeightRequest="40"
+                                        Padding="0" FontSize="20"
+                                        VerticalOptions="Center" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Today's Log -->
+            <Label Text="📋 Today's Log" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" Margin="0,8,0,0" />
+            <CollectionView ItemsSource="{Binding TodayEntries}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No entries yet today. Add your first meal!"
+                           TextColor="{StaticResource Gray500}" FontSize="13"
+                           HorizontalOptions="Center" Margin="0,10" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CalorieEntry">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Delete" BackgroundColor="{StaticResource AccentRed}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CaloriesViewModel}}, Path=RemoveEntryCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <Frame BackgroundColor="{StaticResource CardBackground}"
+                                   CornerRadius="10" Padding="12" Margin="0,3"
+                                   BorderColor="Transparent" HasShadow="False">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="3">
+                                    <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
+                                           TextColor="{StaticResource White}" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Calories, StringFormat='{0} kcal'}"
+                                           FontSize="14" TextColor="{StaticResource AccentOrange}"
+                                           FontAttributes="Bold" />
+                                    <Label Grid.Row="1"
+                                           Text="{Binding MealType}" FontSize="11"
+                                           TextColor="{StaticResource Gray400}" />
+                                    <Label Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding Timestamp, StringFormat='{0:h:mm tt}'}"
+                                           FontSize="11" TextColor="{StaticResource Gray500}" />
+                                </Grid>
+                            </Frame>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
