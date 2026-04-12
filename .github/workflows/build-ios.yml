@@ -10,10 +10,24 @@ env:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-15
 
     steps:
     - uses: actions/checkout@v5
+
+    - name: Select Xcode 26
+      run: |
+        echo "Available Xcode versions:"
+        ls -d /Applications/Xcode* || true
+        XCODE26=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1)
+        if [ -n "$XCODE26" ]; then
+          sudo xcode-select -s "$XCODE26/Contents/Developer"
+          echo "Selected: $XCODE26"
+        else
+          echo "::error::Xcode 26 is not installed on this runner. .NET 10 iOS SDK requires Xcode 26."
+          exit 1
+        fi
+        xcodebuild -version
 
     - name: Pin to .NET 10 SDK
       run: |
