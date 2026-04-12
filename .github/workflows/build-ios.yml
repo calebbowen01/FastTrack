@@ -52,46 +52,72 @@ jobs:
     - name: Patch Xcode version check
       run: |
         # The iOS SDK 26.2 strictly requires Xcode 26.2 but the runner has 26.3.
-        # The workload-installed targets files may be read-only, so chmod first.
-        FILES=$(find $HOME/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" 2>/dev/null)
+        # Use python3 for reliable multi-line file patching (sed/perl failed on
+        # read-only files and multi-line XML elements in previous attempts).
+        cat > /tmp/patch_xcode_check.py << 'PYEOF'
+        import sys, os, re
+
+        path = sys.argv[1]
+        print(f"File: {path}")
+        print(f"Exists: {os.path.exists(path)}, Writable: {os.access(path, os.W_OK)}")
+
+        with open(path, 'r') as f:
+            lines = f.readlines()
+
+        # --- Targeted patch: find <Error> elements referencing Xcode requirements ---
+        patched = False
+        in_error = False
+        error_start = -1
+        for i in range(len(lines)):
+            if '<Error' in lines[i]:
+                in_error = True
+                error_start = i
+            if in_error and ('requires Xcode' in lines[i] or 'RequiredXcode' in lines[i]):
+                lines[error_start] = lines[error_start].replace('<Error', '<Warning', 1)
+                for j in range(error_start, min(len(lines), i + 3)):
+                    lines[j] = lines[j].replace('</Error>', '</Warning>')
+                patched = True
+                in_error = False
+            elif in_error and ('/>' in lines[i] or '</Error' in lines[i]):
+                in_error = False
+
+        if patched:
+            with open(path, 'w') as f:
+                f.writelines(lines)
+            print("✅ Targeted patch applied")
+        else:
+            print("⚠️  Targeted match failed — applying broad regex patch...")
+            content = ''.join(lines)
+            new_content = re.sub(r'<Error\b', '<Warning', content)
+            new_content = re.sub(r'</Error>', '</Warning>', new_content)
+            with open(path, 'w') as f:
+                f.write(new_content)
+            print("✅ Broad patch applied (all <Error> → <Warning>)")
+
+        # Verify
+        with open(path, 'r') as f:
+            verify = f.read()
+        if '<Error' in verify and 'requires Xcode' in verify:
+            print("❌ Verification FAILED — <Error...requires Xcode> still present")
+            sys.exit(1)
+        else:
+            print("✅ Verification passed")
+        PYEOF
+
+        # Search all possible SDK locations
+        FILES=$(find $HOME/.dotnet /usr/local/share/dotnet 2>/dev/null -name "Xamarin.Shared.Sdk.targets" 2>/dev/null || true)
         if [ -z "$FILES" ]; then
-          echo "⚠️ No Xamarin.Shared.Sdk.targets found — skipping patch"
+          echo "⚠️ No Xamarin.Shared.Sdk.targets found"
           exit 0
         fi
+        echo "Found targets files:"
+        echo "$FILES"
 
         echo "$FILES" | while IFS= read -r f; do
-          echo "=== Patching: $f ==="
-          chmod u+w "$f"
-
-          # Show context around the Xcode version check
-          echo "--- Lines mentioning Xcode (before patch) ---"
-          grep -n 'Xcode\|_RequiredXcode' "$f" | head -20
-
-          # Find the line(s) that emit the error text
-          ERROR_LINES=$(grep -n 'requires Xcode' "$f" | cut -d: -f1)
-          if [ -z "$ERROR_LINES" ]; then
-            echo "⚠️  'requires Xcode' not found in $f"
-            continue
-          fi
-
-          for LINE in $ERROR_LINES; do
-            START=$((LINE - 10)); [ $START -lt 1 ] && START=1
-            END=$((LINE + 2))
-            echo "--- Before (lines $START-$END) ---"
-            sed -n "${START},${END}p" "$f"
-            # Replace <Error with <Warning (handles both self-closing and paired tags)
-            sed -i '' "${START},${END}s/<Error/<Warning/g" "$f"
-            sed -i '' "${START},${END}s/<\/Error/<\/Warning/g" "$f"
-            echo "--- After ---"
-            sed -n "${START},${END}p" "$f"
-          done
-
-          # Final verification
-          if grep -q '<Error.*requires Xcode\|requires Xcode.*<Error' "$f"; then
-            echo "❌ Patch may not have fully applied for: $f"
-          else
-            echo "✅ Patch verified for: $f"
-          fi
+          echo ""
+          echo "=== Processing: $f ==="
+          chmod u+w "$f" 2>/dev/null || sudo chmod u+w "$f" 2>/dev/null || true
+          python3 /tmp/patch_xcode_check.py "$f"
         done
 
     - name: Build iOS IPA
