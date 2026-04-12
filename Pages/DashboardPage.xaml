@@ -128,16 +128,25 @@
             <Frame BackgroundColor="{StaticResource CardBackground}"
                    CornerRadius="16" Padding="20" BorderColor="Transparent"
                    HasShadow="False">
-                <HorizontalStackLayout Spacing="12">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                     <Label Text="🔥" FontSize="32" VerticalOptions="Center" />
-                    <StackLayout Spacing="2" VerticalOptions="Center">
+                    <StackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                         <Label Text="{Binding FastingStreak, StringFormat='{0} Day Streak'}"
                                FontSize="20" FontAttributes="Bold"
                                TextColor="{StaticResource White}" />
                         <Label Text="Keep going! Consistency is key."
                                FontSize="12" TextColor="{StaticResource Gray400}" />
                     </StackLayout>
-                </HorizontalStackLayout>
+                    <StackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center"
+                                 HorizontalOptions="Center">
+                        <Label Text="🏆" FontSize="16" HorizontalOptions="Center" />
+                        <Label Text="{Binding LongestStreak, StringFormat='{0}'}"
+                               FontSize="18" FontAttributes="Bold"
+                               TextColor="{StaticResource AccentOrange}" HorizontalOptions="Center" />
+                        <Label Text="Best" FontSize="10"
+                               TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                    </StackLayout>
+                </Grid>
             </Frame>
 
         </VerticalStackLayout>

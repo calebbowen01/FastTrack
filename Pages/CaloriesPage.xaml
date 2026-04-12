@@ -32,26 +32,41 @@
                            FontSize="13" TextColor="{StaticResource Accent}"
                            HorizontalOptions="Center" />
 
-                    <!-- Macros -->
-                    <Grid ColumnDefinitions="*,*,*" Margin="0,6,0,0">
+                    <!-- Macros with progress -->
+                    <Grid ColumnDefinitions="*,*,*" Margin="0,6,0,0" RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
                         <StackLayout HorizontalOptions="Center" Spacing="2">
                             <Label Text="{Binding TodayProtein, StringFormat='{0:F0}g'}"
                                    FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentBlue}"
                                    HorizontalOptions="Center" />
+                            <Label Text="{Binding ProteinGoal, StringFormat='/ {0}g'}" FontSize="10"
+                                   TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                             <Label Text="Protein" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                         </StackLayout>
                         <StackLayout Grid.Column="1" HorizontalOptions="Center" Spacing="2">
                             <Label Text="{Binding TodayCarbs, StringFormat='{0:F0}g'}"
                                    FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentOrange}"
                                    HorizontalOptions="Center" />
+                            <Label Text="{Binding CarbsGoal, StringFormat='/ {0}g'}" FontSize="10"
+                                   TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                             <Label Text="Carbs" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                         </StackLayout>
                         <StackLayout Grid.Column="2" HorizontalOptions="Center" Spacing="2">
                             <Label Text="{Binding TodayFat, StringFormat='{0:F0}g'}"
                                    FontSize="18" FontAttributes="Bold" TextColor="{StaticResource AccentRed}"
                                    HorizontalOptions="Center" />
+                            <Label Text="{Binding FatGoal, StringFormat='/ {0}g'}" FontSize="10"
+                                   TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                             <Label Text="Fat" FontSize="11" TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                         </StackLayout>
+                        <ProgressBar Grid.Row="2" Progress="{Binding ProteinProgress}"
+                                     ProgressColor="{StaticResource AccentBlue}"
+                                     BackgroundColor="{StaticResource CardBackgroundAlt}" HeightRequest="4" />
+                        <ProgressBar Grid.Row="2" Grid.Column="1" Progress="{Binding CarbsProgress}"
+                                     ProgressColor="{StaticResource AccentOrange}"
+                                     BackgroundColor="{StaticResource CardBackgroundAlt}" HeightRequest="4" />
+                        <ProgressBar Grid.Row="2" Grid.Column="2" Progress="{Binding FatProgress}"
+                                     ProgressColor="{StaticResource AccentRed}"
+                                     BackgroundColor="{StaticResource CardBackgroundAlt}" HeightRequest="4" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
@@ -69,6 +84,81 @@
                             VerticalOptions="Center"
                             HorizontalOptions="FillAndExpand" />
                 </HorizontalStackLayout>
+            </Frame>
+
+            <!-- Barcode Scanner Section -->
+            <Label Text="📷 Scan Barcode" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="16" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Enter the barcode number from the product packaging"
+                           FontSize="12" TextColor="{StaticResource Gray400}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                        <Entry Placeholder="Barcode number (e.g. 5000159484695)"
+                               Text="{Binding BarcodeText}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource White}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Button Grid.Column="1" Text="Look Up"
+                                Command="{Binding BarcodeLookupCommand}"
+                                BackgroundColor="{StaticResource AccentCyan}"
+                                TextColor="{StaticResource Black}"
+                                FontAttributes="Bold" CornerRadius="10"
+                                HeightRequest="44" WidthRequest="90" />
+                    </Grid>
+
+                    <ActivityIndicator IsRunning="{Binding IsBarcodeLoading}"
+                                       IsVisible="{Binding IsBarcodeLoading}"
+                                       Color="{StaticResource AccentCyan}"
+                                       HeightRequest="24" />
+
+                    <Label Text="{Binding BarcodeStatus}"
+                           FontSize="13" TextColor="{StaticResource Accent}" />
+
+                    <!-- Scanned Product Result -->
+                    <Frame BackgroundColor="{StaticResource CardBackgroundAlt}"
+                           CornerRadius="12" Padding="14" BorderColor="Transparent" HasShadow="False"
+                           IsVisible="{Binding HasScannedProduct}">
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="{Binding ScannedProductDisplay}"
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="{StaticResource White}" />
+                            <Label Text="{Binding ScannedCaloriesDisplay}"
+                                   FontSize="14" TextColor="{StaticResource AccentOrange}" />
+                            <Label Text="{Binding ScannedMacrosDisplay}"
+                                   FontSize="12" TextColor="{StaticResource Gray300}" />
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <Entry Placeholder="Servings" Text="{Binding ServingsText}"
+                                       Keyboard="Numeric"
+                                       PlaceholderColor="{StaticResource Gray500}"
+                                       TextColor="{StaticResource White}"
+                                       BackgroundColor="{StaticResource CardBackground}" />
+                                <Label Grid.Column="1" Text="servings" FontSize="13"
+                                       TextColor="{StaticResource Gray400}" VerticalOptions="Center" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <Button Text="Add"
+                                        Command="{Binding BarcodeAddCommand}"
+                                        BackgroundColor="{StaticResource Accent}"
+                                        TextColor="{StaticResource Black}"
+                                        FontAttributes="Bold" CornerRadius="10"
+                                        HeightRequest="40" />
+                                <Button Grid.Column="1" Text="⭐ Save"
+                                        Command="{Binding SaveAsFavoriteCommand}"
+                                        BackgroundColor="{StaticResource AccentOrange}"
+                                        TextColor="{StaticResource Black}"
+                                        FontAttributes="Bold" CornerRadius="10"
+                                        HeightRequest="40" />
+                                <Button Grid.Column="2" Text="Cancel"
+                                        BackgroundColor="{StaticResource CardBackground}"
+                                        TextColor="{StaticResource Gray300}"
+                                        CornerRadius="10" HeightRequest="40" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Frame>
+                </VerticalStackLayout>
             </Frame>
 
             <!-- Quick Add Section -->
@@ -133,6 +223,54 @@
                             HeightRequest="44" />
                 </VerticalStackLayout>
             </Frame>
+
+            <!-- Favorite Meals -->
+            <Label Text="⭐ My Favorites" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}"
+                   IsVisible="{Binding HasFavorites}" />
+            <CollectionView ItemsSource="{Binding Favorites}" SelectionMode="None"
+                            IsVisible="{Binding HasFavorites}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:MealPreset">
+                        <Frame BackgroundColor="{StaticResource CardBackgroundAlt}"
+                               CornerRadius="12" Padding="12" Margin="0,3"
+                               BorderColor="Transparent" HasShadow="False">
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                <Label Text="{Binding Icon}" FontSize="24" VerticalOptions="Center" />
+                                <StackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                    <Label Text="{Binding Name}" FontSize="13" FontAttributes="Bold"
+                                           TextColor="{StaticResource White}" LineBreakMode="TailTruncation" />
+                                    <Label FontSize="11" TextColor="{StaticResource Gray400}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding Calories, StringFormat='{0} kcal'}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                </StackLayout>
+                                <Button Grid.Column="2" Text="+"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CaloriesViewModel}}, Path=FavoriteAddCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="{StaticResource Accent}"
+                                        TextColor="{StaticResource Black}"
+                                        FontAttributes="Bold" CornerRadius="8"
+                                        WidthRequest="36" HeightRequest="36"
+                                        Padding="0" FontSize="18"
+                                        VerticalOptions="Center" />
+                                <Button Grid.Column="3" Text="✕"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CaloriesViewModel}}, Path=FavoriteRemoveCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="{StaticResource CardBackground}"
+                                        TextColor="{StaticResource AccentRed}"
+                                        CornerRadius="8"
+                                        WidthRequest="36" HeightRequest="36"
+                                        Padding="0" FontSize="14"
+                                        VerticalOptions="Center" />
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
             <!-- Meal Presets -->
             <Label Text="🍽️ Meal Presets" FontSize="17" FontAttributes="Bold"

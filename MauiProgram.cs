@@ -22,6 +22,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<FastingService>();
 		builder.Services.AddSingleton<CalorieService>();
 		builder.Services.AddSingleton<WaterService>();
+		builder.Services.AddSingleton<BarcodeService>();
+		builder.Services.AddSingleton<FavoriteMealService>();
 
 		// ViewModels
 		builder.Services.AddTransient<DashboardViewModel>();

@@ -33,6 +33,24 @@ public class CalorieService
         set => Preferences.Set("calorie_goal", value);
     }
 
+    public int DailyProteinGoal
+    {
+        get => Preferences.Get("protein_goal", 150);
+        set => Preferences.Set("protein_goal", value);
+    }
+
+    public int DailyCarbsGoal
+    {
+        get => Preferences.Get("carbs_goal", 250);
+        set => Preferences.Set("carbs_goal", value);
+    }
+
+    public int DailyFatGoal
+    {
+        get => Preferences.Get("fat_goal", 65);
+        set => Preferences.Set("fat_goal", value);
+    }
+
     public List<CalorieEntry> TodayEntries => _entries.Where(e => e.Timestamp.Date == DateTime.Today).OrderByDescending(e => e.Timestamp).ToList();
 
     public int TodayCalories => TodayEntries.Sum(e => e.Calories);
@@ -84,20 +102,44 @@ public class CalorieService
         return entry;
     }
 
-    public CalorieEntry AddFromPreset(MealPreset preset, MealType mealType)
+    public CalorieEntry AddFromPreset(MealPreset preset, MealType mealType, double servings = 1.0)
     {
         var entry = new CalorieEntry
         {
-            Name = preset.Name,
-            Calories = preset.Calories,
-            ProteinGrams = preset.ProteinGrams,
-            CarbsGrams = preset.CarbsGrams,
-            FatGrams = preset.FatGrams,
+            Name = servings != 1.0 ? $"{preset.Name} (×{servings:F1})" : preset.Name,
+            Calories = (int)(preset.Calories * servings),
+            ProteinGrams = preset.ProteinGrams * servings,
+            CarbsGrams = preset.CarbsGrams * servings,
+            FatGrams = preset.FatGrams * servings,
             MealType = mealType,
             Method = EntryMethod.MealPreset
         };
         AddEntry(entry);
         return entry;
+    }
+
+    public CalorieEntry AddFromBarcode(string name, int calories, double protein, double carbs, double fat, string barcode, MealType mealType, double servings = 1.0)
+    {
+        var entry = new CalorieEntry
+        {
+            Name = servings != 1.0 ? $"{name} (×{servings:F1})" : name,
+            Calories = (int)(calories * servings),
+            ProteinGrams = protein * servings,
+            CarbsGrams = carbs * servings,
+            FatGrams = fat * servings,
+            Barcode = barcode,
+            MealType = mealType,
+            Method = EntryMethod.BarcodeScanned
+        };
+        AddEntry(entry);
+        return entry;
+    }
+
+    public void ClearAll()
+    {
+        _entries.Clear();
+        Preferences.Remove(EntriesKey);
+        Preferences.Remove("calorie_goal");
     }
 
     private void Save()

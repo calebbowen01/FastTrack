@@ -51,6 +51,26 @@ public class FastingService
         }
     }
 
+    public int LongestStreak
+    {
+        get
+        {
+            var completed = CompletedSessions.OrderBy(s => s.StartTime).ToList();
+            if (completed.Count == 0) return 0;
+            int longest = 1, current = 1;
+            for (int i = 1; i < completed.Count; i++)
+            {
+                var diff = (completed[i].StartTime.Date - completed[i - 1].StartTime.Date).Days;
+                if (diff <= 1)
+                    current++;
+                else
+                    current = 1;
+                longest = Math.Max(longest, current);
+            }
+            return longest;
+        }
+    }
+
     public FastingSession StartFast(FastingPlan plan)
     {
         if (IsFasting) throw new InvalidOperationException("A fast is already active.");
@@ -75,6 +95,13 @@ public class FastingService
     }
 
     public List<FastingSession> GetHistory() => CompletedSessions;
+
+    public void ClearAll()
+    {
+        _sessions.Clear();
+        Preferences.Remove(SessionsKey);
+        Preferences.Remove(ActiveSessionKey);
+    }
 
     private void Save()
     {

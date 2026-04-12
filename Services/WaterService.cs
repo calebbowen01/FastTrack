@@ -42,6 +42,13 @@ public class WaterService
         }
     }
 
+    public void ClearAll()
+    {
+        _entries.Clear();
+        Preferences.Remove(EntriesKey);
+        Preferences.Remove("water_goal_ml");
+    }
+
     private void Save()
     {
         var json = JsonSerializer.Serialize(_entries);

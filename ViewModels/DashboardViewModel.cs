@@ -39,6 +39,7 @@ public class DashboardViewModel : BaseViewModel
     public string WaterDisplay => $"{WaterTotalMl / 1000.0:F1}L / {WaterGoalMl / 1000.0:F1}L";
 
     public int FastingStreak => _fastingService.CurrentStreak;
+    public int LongestStreak => _fastingService.LongestStreak;
 
     public string Greeting
     {
@@ -91,6 +92,7 @@ public class DashboardViewModel : BaseViewModel
         OnPropertyChanged(nameof(WaterProgress));
         OnPropertyChanged(nameof(WaterDisplay));
         OnPropertyChanged(nameof(FastingStreak));
+        OnPropertyChanged(nameof(LongestStreak));
         OnPropertyChanged(nameof(Greeting));
         RefreshFastingDisplay();
     }

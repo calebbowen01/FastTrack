@@ -12,7 +12,8 @@ public enum EntryMethod
 {
     QuickAdd,
     ManualMacros,
-    MealPreset
+    MealPreset,
+    BarcodeScanned
 }
 
 public class CalorieEntry
@@ -25,5 +26,6 @@ public class CalorieEntry
     public double FatGrams { get; set; }
     public MealType MealType { get; set; }
     public EntryMethod Method { get; set; }
+    public string Barcode { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; } = DateTime.Now;
 }

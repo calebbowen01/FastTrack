@@ -14,82 +14,181 @@
                    TextColor="{StaticResource White}" />
 
             <!-- Stats Overview -->
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
                 <Frame BackgroundColor="{StaticResource CardBackground}"
-                       CornerRadius="16" Padding="18" BorderColor="Transparent" HasShadow="False">
+                       CornerRadius="16" Padding="14" BorderColor="Transparent" HasShadow="False">
                     <StackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="🔥" FontSize="28" HorizontalOptions="Center" />
+                        <Label Text="🔥" FontSize="24" HorizontalOptions="Center" />
                         <Label Text="{Binding FastingStreak, StringFormat='{0}'}"
-                               FontSize="28" FontAttributes="Bold"
+                               FontSize="24" FontAttributes="Bold"
                                TextColor="{StaticResource Accent}" HorizontalOptions="Center" />
-                        <Label Text="Day Streak" FontSize="12"
+                        <Label Text="Streak" FontSize="11"
                                TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                     </StackLayout>
                 </Frame>
                 <Frame Grid.Column="1" BackgroundColor="{StaticResource CardBackground}"
-                       CornerRadius="16" Padding="18" BorderColor="Transparent" HasShadow="False">
+                       CornerRadius="16" Padding="14" BorderColor="Transparent" HasShadow="False">
                     <StackLayout Spacing="4" HorizontalOptions="Center">
-                        <Label Text="✅" FontSize="28" HorizontalOptions="Center" />
+                        <Label Text="🏆" FontSize="24" HorizontalOptions="Center" />
+                        <Label Text="{Binding LongestStreak, StringFormat='{0}'}"
+                               FontSize="24" FontAttributes="Bold"
+                               TextColor="{StaticResource AccentOrange}" HorizontalOptions="Center" />
+                        <Label Text="Best" FontSize="11"
+                               TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
+                    </StackLayout>
+                </Frame>
+                <Frame Grid.Column="2" BackgroundColor="{StaticResource CardBackground}"
+                       CornerRadius="16" Padding="14" BorderColor="Transparent" HasShadow="False">
+                    <StackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="✅" FontSize="24" HorizontalOptions="Center" />
                         <Label Text="{Binding TotalFasts, StringFormat='{0}'}"
-                               FontSize="28" FontAttributes="Bold"
+                               FontSize="24" FontAttributes="Bold"
                                TextColor="{StaticResource AccentBlue}" HorizontalOptions="Center" />
-                        <Label Text="Total Fasts" FontSize="12"
+                        <Label Text="Total" FontSize="11"
                                TextColor="{StaticResource Gray400}" HorizontalOptions="Center" />
                     </StackLayout>
                 </Frame>
             </Grid>
 
-            <!-- Goals Settings -->
-            <Label Text="Goals" FontSize="17" FontAttributes="Bold"
+            <!-- Calorie &amp; Water Goals -->
+            <Label Text="Daily Goals" FontSize="17" FontAttributes="Bold"
                    TextColor="{StaticResource White}" Margin="0,8,0,0" />
 
             <Frame BackgroundColor="{StaticResource CardBackground}"
                    CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
                 <VerticalStackLayout Spacing="14">
-                    <StackLayout Spacing="4">
-                        <Label Text="Daily Calorie Goal (kcal)" FontSize="13" TextColor="{StaticResource Gray300}" />
-                        <Entry Text="{Binding CalorieGoalText}" Keyboard="Numeric"
-                               PlaceholderColor="{StaticResource Gray500}"
-                               TextColor="{StaticResource White}"
-                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
-                    </StackLayout>
-
-                    <StackLayout Spacing="4">
-                        <Label Text="Daily Water Goal (ml)" FontSize="13" TextColor="{StaticResource Gray300}" />
-                        <Entry Text="{Binding WaterGoalText}" Keyboard="Numeric"
-                               PlaceholderColor="{StaticResource Gray500}"
-                               TextColor="{StaticResource White}"
-                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
-                    </StackLayout>
-
-                    <StackLayout Spacing="4">
-                        <Label Text="Current Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
-                        <Entry Text="{Binding WeightText}" Keyboard="Numeric"
-                               PlaceholderColor="{StaticResource Gray500}"
-                               TextColor="{StaticResource White}"
-                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
-                    </StackLayout>
-
-                    <StackLayout Spacing="4">
-                        <Label Text="Goal Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
-                        <Entry Text="{Binding GoalWeightText}" Keyboard="Numeric"
-                               PlaceholderColor="{StaticResource Gray500}"
-                               TextColor="{StaticResource White}"
-                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
-                    </StackLayout>
-
-                    <Button Text="Save Settings"
-                            Command="{Binding SaveCommand}"
-                            BackgroundColor="{StaticResource Accent}"
-                            TextColor="{StaticResource Black}"
-                            FontAttributes="Bold" FontSize="16"
-                            CornerRadius="12" HeightRequest="48" />
-
-                    <Label Text="{Binding StatusMessage}"
-                           FontSize="13" TextColor="{StaticResource Accent}"
-                           HorizontalOptions="Center" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <StackLayout Spacing="4">
+                            <Label Text="Calorie Goal (kcal)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding CalorieGoalText}" Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Water Goal (ml)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding WaterGoalText}" Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                    </Grid>
                 </VerticalStackLayout>
             </Frame>
+
+            <!-- Macro Goals -->
+            <Label Text="Macro Goals" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                    <StackLayout Spacing="4">
+                        <Label Text="Protein (g)" FontSize="12" TextColor="{StaticResource AccentBlue}" />
+                        <Entry Text="{Binding ProteinGoalText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentBlue}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="1" Spacing="4">
+                        <Label Text="Carbs (g)" FontSize="12" TextColor="{StaticResource AccentOrange}" />
+                        <Entry Text="{Binding CarbsGoalText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentOrange}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+                    <StackLayout Grid.Column="2" Spacing="4">
+                        <Label Text="Fat (g)" FontSize="12" TextColor="{StaticResource AccentRed}" />
+                        <Entry Text="{Binding FatGoalText}" Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentRed}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                    </StackLayout>
+                </Grid>
+            </Frame>
+
+            <!-- Body Stats -->
+            <Label Text="Body Stats" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <StackLayout Spacing="4">
+                            <Label Text="Current Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding WeightText}" Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Goal Weight (lbs)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding GoalWeightText}" Keyboard="Numeric"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                        <StackLayout Spacing="4">
+                            <Label Text="Height (in)" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding HeightText}" Keyboard="Numeric"
+                                   Placeholder="e.g. 70"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="1" Spacing="4">
+                            <Label Text="Age" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Entry Text="{Binding AgeText}" Keyboard="Numeric"
+                                   Placeholder="e.g. 25"
+                                   PlaceholderColor="{StaticResource Gray500}"
+                                   TextColor="{StaticResource White}"
+                                   BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                        <StackLayout Grid.Column="2" Spacing="4">
+                            <Label Text="Gender" FontSize="13" TextColor="{StaticResource Gray300}" />
+                            <Picker ItemsSource="{Binding Genders}"
+                                    SelectedItem="{Binding SelectedGender}"
+                                    TextColor="{StaticResource White}"
+                                    BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        </StackLayout>
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- BMR Calculator -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="🔬 BMR / TDEE Calculator" FontSize="15" FontAttributes="Bold"
+                           TextColor="{StaticResource White}" />
+                    <Label Text="Fill in your body stats above, then tap Calculate to see your estimated daily calorie needs."
+                           FontSize="12" TextColor="{StaticResource Gray400}" />
+                    <Button Text="Calculate BMR"
+                            Command="{Binding CalculateBmrCommand}"
+                            BackgroundColor="{StaticResource AccentCyan}"
+                            TextColor="{StaticResource Black}"
+                            FontAttributes="Bold" FontSize="14"
+                            CornerRadius="10" HeightRequest="42" />
+                    <Label Text="{Binding BmrDisplay}"
+                           FontSize="13" TextColor="{StaticResource AccentCyan}"
+                           LineBreakMode="WordWrap" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Save Button -->
+            <Button Text="Save All Settings"
+                    Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource Accent}"
+                    TextColor="{StaticResource Black}"
+                    FontAttributes="Bold" FontSize="16"
+                    CornerRadius="12" HeightRequest="48" />
+
+            <Label Text="{Binding StatusMessage}"
+                   FontSize="13" TextColor="{StaticResource Accent}"
+                   HorizontalOptions="Center" />
 
             <!-- Reset -->
             <Button Text="Reset All Data"
