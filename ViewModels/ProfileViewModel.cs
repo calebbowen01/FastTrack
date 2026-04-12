@@ -77,7 +77,7 @@ public class ProfileViewModel : BaseViewModel
 
     private async void ResetData()
     {
-        var confirm = await Application.Current!.Windows[0].Page!.DisplayAlertAsync(
+        var confirm = await Application.Current!.Windows[0].Page!.DisplayAlert(
             "Reset All Data",
             "This will clear all your fasting, calorie, and water data. This cannot be undone.",
             "Reset", "Cancel");
