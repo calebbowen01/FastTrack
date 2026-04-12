@@ -2,6 +2,8 @@
 using MyMauiApp.Services;
 using MyMauiApp.ViewModels;
 using MyMauiApp.Pages;
+using Plugin.LocalNotification;
+using ZXing.Net.Maui.Controls;
 
 namespace MyMauiApp;
 
@@ -12,6 +14,8 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.UseBarcodeReader()
+			.UseLocalNotification()
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -24,6 +28,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<WaterService>();
 		builder.Services.AddSingleton<BarcodeService>();
 		builder.Services.AddSingleton<FavoriteMealService>();
+		builder.Services.AddSingleton<NotificationService>();
 
 		// ViewModels
 		builder.Services.AddTransient<DashboardViewModel>();

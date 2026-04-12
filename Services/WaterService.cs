@@ -42,6 +42,12 @@ public class WaterService
         }
     }
 
+    public void RemoveEntry(string id)
+    {
+        _entries.RemoveAll(e => e.Id == id);
+        Save();
+    }
+
     public void ClearAll()
     {
         _entries.Clear();

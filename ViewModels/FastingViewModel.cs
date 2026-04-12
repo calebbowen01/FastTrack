@@ -8,15 +8,18 @@ namespace MyMauiApp.ViewModels;
 public class FastingViewModel : BaseViewModel
 {
     private readonly FastingService _fastingService;
+    private readonly NotificationService _notificationService;
     private IDispatcherTimer? _timer;
     private FastingPlan _selectedPlan;
 
-    public FastingViewModel(FastingService fastingService)
+    public FastingViewModel(FastingService fastingService, NotificationService notificationService)
     {
         _fastingService = fastingService;
+        _notificationService = notificationService;
         _selectedPlan = Plans[0];
         StartFastCommand = new Command(StartFast, () => !IsFasting);
         StopFastCommand = new Command(StopFast, () => IsFasting);
+        DeleteSessionCommand = new Command<FastingSession>(DoDeleteSession);
         RefreshHistory();
     }
 
@@ -86,6 +89,7 @@ public class FastingViewModel : BaseViewModel
 
     public Command StartFastCommand { get; }
     public Command StopFastCommand { get; }
+    public ICommand DeleteSessionCommand { get; }
 
     public int Streak => _fastingService.CurrentStreak;
 
@@ -107,12 +111,15 @@ public class FastingViewModel : BaseViewModel
             };
         }
         _fastingService.StartFast(plan);
+        _ = _notificationService.ScheduleFastingNotifications(
+            _fastingService.ActiveSession!.StartTime, plan.FastingHours, plan.Name);
         RefreshAll();
         StartTimer();
     }
 
     public void StopFast()
     {
+        _notificationService.CancelFastingNotifications();
         _fastingService.StopFast();
         StopTimer();
         RefreshAll();
@@ -164,6 +171,13 @@ public class FastingViewModel : BaseViewModel
         History.Clear();
         foreach (var s in _fastingService.GetHistory().Take(20))
             History.Add(s);
+    }
+
+    private void DoDeleteSession(FastingSession session)
+    {
+        _fastingService.DeleteSession(session.Id);
+        RefreshHistory();
+        OnPropertyChanged(nameof(Streak));
     }
 
     private static string FormatTimeSpan(TimeSpan ts) => $"{(int)ts.TotalHours:D2}:{ts.Minutes:D2}:{ts.Seconds:D2}";

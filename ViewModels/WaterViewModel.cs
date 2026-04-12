@@ -1,4 +1,6 @@
+using System.Collections.ObjectModel;
 using System.Windows.Input;
+using MyMauiApp.Models;
 using MyMauiApp.Services;
 
 namespace MyMauiApp.ViewModels;
@@ -6,14 +8,18 @@ namespace MyMauiApp.ViewModels;
 public class WaterViewModel : BaseViewModel
 {
     private readonly WaterService _waterService;
+    private readonly NotificationService _notificationService;
 
-    public WaterViewModel(WaterService waterService)
+    public WaterViewModel(WaterService waterService, NotificationService notificationService)
     {
         _waterService = waterService;
+        _notificationService = notificationService;
         Add250Command = new Command(() => AddWater(250));
         Add500Command = new Command(() => AddWater(500));
         AddCustomCommand = new Command(AddCustom);
         UndoCommand = new Command(Undo);
+        RemoveEntryCommand = new Command<WaterEntry>(DoRemoveEntry);
+        RefreshEntries();
     }
 
     private string _customAmount = string.Empty;
@@ -28,14 +34,19 @@ public class WaterViewModel : BaseViewModel
     public string PercentText => $"{(int)(Progress * 100)}%";
     public bool GoalReached => TodayTotalMl >= GoalMl;
 
+    public ObservableCollection<WaterEntry> TodayEntries { get; } = [];
+
     public ICommand Add250Command { get; }
     public ICommand Add500Command { get; }
     public ICommand AddCustomCommand { get; }
     public ICommand UndoCommand { get; }
+    public ICommand RemoveEntryCommand { get; }
 
     private void AddWater(int ml)
     {
         _waterService.AddWater(ml);
+        if (!GoalReached)
+            _ = _notificationService.ScheduleWaterReminder();
         RefreshAll();
     }
 
@@ -55,8 +66,22 @@ public class WaterViewModel : BaseViewModel
         RefreshAll();
     }
 
+    private void DoRemoveEntry(WaterEntry entry)
+    {
+        _waterService.RemoveEntry(entry.Id);
+        RefreshAll();
+    }
+
+    private void RefreshEntries()
+    {
+        TodayEntries.Clear();
+        foreach (var e in _waterService.TodayEntries.OrderByDescending(e => e.Timestamp))
+            TodayEntries.Add(e);
+    }
+
     public void RefreshAll()
     {
+        RefreshEntries();
         OnPropertyChanged(nameof(TodayTotalMl));
         OnPropertyChanged(nameof(GoalMl));
         OnPropertyChanged(nameof(Progress));

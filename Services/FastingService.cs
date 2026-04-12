@@ -96,6 +96,12 @@ public class FastingService
 
     public List<FastingSession> GetHistory() => CompletedSessions;
 
+    public void DeleteSession(string id)
+    {
+        _sessions.RemoveAll(s => s.Id == id);
+        Save();
+    }
+
     public void ClearAll()
     {
         _sessions.Clear();

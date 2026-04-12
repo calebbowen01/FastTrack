@@ -1,0 +1,19 @@
+ App.xaml.cs                           |  5 [32m+[m[31m--[m
+ MauiProgram.cs                        |  5 [32m+++[m
+ MyMauiApp.csproj                      |  4 [32m++[m[31m-[m
+ Pages/CaloriesPage.xaml               | 66 [32m++++++++++++++++++++++++++++++++[m[31m---[m
+ Pages/CaloriesPage.xaml.cs            | 19 [32m++++++++++[m
+ Pages/FastingPage.xaml                | 39 [32m+++++++++++++[m[31m--------[m
+ Pages/ProfilePage.xaml                | 33 [32m++++++++++++++++++[m
+ Pages/WaterPage.xaml                  | 42 [32m++++++++++++++++++++++[m
+ Platforms/Android/AndroidManifest.xml |  4 [32m+++[m
+ Platforms/iOS/Info.plist              |  2 [32m++[m
+ Resources/AppIcon/appiconfg.svg       | 10 [32m+++[m[31m---[m
+ Resources/Splash/splash.svg           | 10 [32m+++[m[31m---[m
+ Services/FastingService.cs            |  6 [32m++++[m
+ Services/WaterService.cs              |  6 [32m++++[m
+ ViewModels/CaloriesViewModel.cs       | 58 [32m+++++++++++++++++++++++++++++[m[31m-[m
+ ViewModels/FastingViewModel.cs        | 16 [32m++++++++[m[31m-[m
+ ViewModels/ProfileViewModel.cs        | 33 [32m+++++++++++++++++[m[31m-[m
+ ViewModels/WaterViewModel.cs          | 27 [32m+++++++++++++[m[31m-[m
+ 18 files changed, 346 insertions(+), 39 deletions(-)

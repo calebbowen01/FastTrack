@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
+             xmlns:models="clr-namespace:MyMauiApp.Models"
              x:Class="MyMauiApp.Pages.WaterPage"
              x:DataType="vm:WaterViewModel"
              BackgroundColor="{StaticResource PageBackground}">
@@ -89,6 +90,47 @@
                     TextColor="{StaticResource Gray300}"
                     FontSize="14" CornerRadius="12"
                     HeightRequest="44" />
+
+            <!-- Today's Water Log -->
+            <Label Text="💧 Today's Log" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" Margin="0,8,0,0" />
+
+            <CollectionView ItemsSource="{Binding TodayEntries}" SelectionMode="None">
+                <CollectionView.EmptyView>
+                    <Label Text="No water logged yet today."
+                           TextColor="{StaticResource Gray500}" FontSize="13"
+                           HorizontalOptions="Center" Margin="0,10" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:WaterEntry">
+                        <SwipeView>
+                            <SwipeView.RightItems>
+                                <SwipeItems>
+                                    <SwipeItem Text="Delete" BackgroundColor="{StaticResource AccentRed}"
+                                               Command="{Binding Source={RelativeSource AncestorType={x:Type vm:WaterViewModel}}, Path=RemoveEntryCommand}"
+                                               CommandParameter="{Binding .}" />
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+                            <Frame BackgroundColor="{StaticResource CardBackground}"
+                                   CornerRadius="10" Padding="12" Margin="0,3"
+                                   BorderColor="Transparent" HasShadow="False">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <Label Text="💧" FontSize="18" VerticalOptions="Center" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding AmountMl, StringFormat='{0} ml'}"
+                                           FontSize="15" FontAttributes="Bold"
+                                           TextColor="{StaticResource AccentCyan}"
+                                           VerticalOptions="Center" Margin="10,0,0,0" />
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Timestamp, StringFormat='{0:h:mm tt}'}"
+                                           FontSize="12" TextColor="{StaticResource Gray500}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </Frame>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
         </VerticalStackLayout>
     </ScrollView>

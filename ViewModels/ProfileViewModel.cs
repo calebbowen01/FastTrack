@@ -9,6 +9,7 @@ public class ProfileViewModel : BaseViewModel
     private readonly CalorieService _calorieService;
     private readonly WaterService _waterService;
     private readonly FavoriteMealService _favoriteMealService;
+    private readonly NotificationService _notificationService;
 
     private string _calorieGoalText = string.Empty;
     private string _waterGoalText = string.Empty;
@@ -23,12 +24,13 @@ public class ProfileViewModel : BaseViewModel
     private string _statusMessage = string.Empty;
     private string _bmrDisplay = string.Empty;
 
-    public ProfileViewModel(FastingService fastingService, CalorieService calorieService, WaterService waterService, FavoriteMealService favoriteMealService)
+    public ProfileViewModel(FastingService fastingService, CalorieService calorieService, WaterService waterService, FavoriteMealService favoriteMealService, NotificationService notificationService)
     {
         _fastingService = fastingService;
         _calorieService = calorieService;
         _waterService = waterService;
         _favoriteMealService = favoriteMealService;
+        _notificationService = notificationService;
         SaveCommand = new Command(Save);
         ResetDataCommand = new Command(ResetData);
         CalculateBmrCommand = new Command(CalculateBmr);
@@ -81,6 +83,30 @@ public class ProfileViewModel : BaseViewModel
     {
         get => Preferences.Get("user_gender", "Male");
         set => Preferences.Set("user_gender", value);
+    }
+
+    public bool NotificationsEnabled
+    {
+        get => _notificationService.NotificationsEnabled;
+        set
+        {
+            _notificationService.NotificationsEnabled = value;
+            OnPropertyChanged();
+            if (!value)
+                _notificationService.CancelAll();
+        }
+    }
+
+    public bool WaterRemindersEnabled
+    {
+        get => _notificationService.WaterRemindersEnabled;
+        set
+        {
+            _notificationService.WaterRemindersEnabled = value;
+            OnPropertyChanged();
+            if (!value)
+                _notificationService.CancelWaterReminder();
+        }
     }
 
     public ICommand SaveCommand { get; }
@@ -182,10 +208,15 @@ public class ProfileViewModel : BaseViewModel
             Preferences.Remove("height_inches");
             Preferences.Remove("user_age");
             Preferences.Remove("user_gender");
+            Preferences.Remove("notifications_enabled");
+            Preferences.Remove("water_reminders_enabled");
+            _notificationService.CancelAll();
             Load();
             OnPropertyChanged(nameof(FastingStreak));
             OnPropertyChanged(nameof(LongestStreak));
             OnPropertyChanged(nameof(TotalFasts));
+            OnPropertyChanged(nameof(NotificationsEnabled));
+            OnPropertyChanged(nameof(WaterRemindersEnabled));
             BmrDisplay = string.Empty;
             StatusMessage = "All data has been reset.";
         }

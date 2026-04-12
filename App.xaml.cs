@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MyMauiApp.Services;
 
 namespace MyMauiApp;
 
 public partial class App : Application
 {
-	public App()
+	public App(NotificationService notificationService)
 	{
 		InitializeComponent();
+		_ = notificationService.RequestPermissionAsync();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

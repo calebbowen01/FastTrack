@@ -178,6 +178,39 @@
                 </VerticalStackLayout>
             </Frame>
 
+            <!-- Notifications -->
+            <Label Text="Notifications" FontSize="17" FontAttributes="Bold"
+                   TextColor="{StaticResource White}" />
+
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="20" BorderColor="Transparent" HasShadow="False">
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Text="🔔 Push Notifications" FontSize="14"
+                                   TextColor="{StaticResource White}" />
+                            <Label Text="Fasting complete, halfway alerts"
+                                   FontSize="11" TextColor="{StaticResource Gray400}" />
+                        </StackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}"
+                                OnColor="{StaticResource Accent}"
+                                ThumbColor="{StaticResource White}" />
+                    </Grid>
+                    <BoxView HeightRequest="1" Color="{StaticResource CardBackgroundAlt}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackLayout Spacing="2" VerticalOptions="Center">
+                            <Label Text="💧 Water Reminders" FontSize="14"
+                                   TextColor="{StaticResource White}" />
+                            <Label Text="Remind every 2 hours (8 AM–10 PM)"
+                                   FontSize="11" TextColor="{StaticResource Gray400}" />
+                        </StackLayout>
+                        <Switch Grid.Column="1" IsToggled="{Binding WaterRemindersEnabled}"
+                                OnColor="{StaticResource AccentCyan}"
+                                ThumbColor="{StaticResource White}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Frame>
+
             <!-- Save Button -->
             <Button Text="Save All Settings"
                     Command="{Binding SaveCommand}"

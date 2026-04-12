@@ -13,6 +13,9 @@ public class CaloriesViewModel : BaseViewModel
 
     private string _quickName = string.Empty;
     private string _quickCalories = string.Empty;
+    private string _quickProtein = string.Empty;
+    private string _quickCarbs = string.Empty;
+    private string _quickFat = string.Empty;
     private MealType _selectedMealType = MealType.Lunch;
 
     private string _macroName = string.Empty;
@@ -28,6 +31,7 @@ public class CaloriesViewModel : BaseViewModel
     private string _servingsText = "1";
 
     private int _selectedTabIndex;
+    private bool _isScannerVisible;
 
     public CaloriesViewModel(CalorieService calorieService, BarcodeService barcodeService, FavoriteMealService favoriteMealService)
     {
@@ -43,6 +47,8 @@ public class CaloriesViewModel : BaseViewModel
         SaveAsFavoriteCommand = new Command(DoSaveAsFavorite);
         FavoriteAddCommand = new Command<MealPreset>(DoFavoriteAdd);
         FavoriteRemoveCommand = new Command<MealPreset>(DoFavoriteRemove);
+        ToggleScannerCommand = new Command(ToggleScanner);
+        ClearScannedProductCommand = new Command(DoClearScannedProduct);
         RefreshEntries();
         RefreshFavorites();
     }
@@ -56,12 +62,19 @@ public class CaloriesViewModel : BaseViewModel
     // Quick Add
     public string QuickName { get => _quickName; set => SetProperty(ref _quickName, value); }
     public string QuickCalories { get => _quickCalories; set => SetProperty(ref _quickCalories, value); }
+    public string QuickProtein { get => _quickProtein; set => SetProperty(ref _quickProtein, value); }
+    public string QuickCarbs { get => _quickCarbs; set => SetProperty(ref _quickCarbs, value); }
+    public string QuickFat { get => _quickFat; set => SetProperty(ref _quickFat, value); }
 
     // Manual Macros
     public string MacroName { get => _macroName; set => SetProperty(ref _macroName, value); }
     public string MacroProtein { get => _macroProtein; set => SetProperty(ref _macroProtein, value); }
     public string MacroCarbs { get => _macroCarbs; set => SetProperty(ref _macroCarbs, value); }
     public string MacroFat { get => _macroFat; set => SetProperty(ref _macroFat, value); }
+
+    // Scanner
+    public bool IsScannerVisible { get => _isScannerVisible; set => SetProperty(ref _isScannerVisible, value); }
+    public string ScannerButtonText => IsScannerVisible ? "Close Scanner" : "📷 Open Camera Scanner";
 
     // Barcode
     public string BarcodeText { get => _barcodeText; set => SetProperty(ref _barcodeText, value); }
@@ -113,13 +126,34 @@ public class CaloriesViewModel : BaseViewModel
     public ICommand SaveAsFavoriteCommand { get; }
     public ICommand FavoriteAddCommand { get; }
     public ICommand FavoriteRemoveCommand { get; }
+    public ICommand ToggleScannerCommand { get; }
+    public ICommand ClearScannedProductCommand { get; }
 
     private void DoQuickAdd()
     {
         if (string.IsNullOrWhiteSpace(QuickName) || !int.TryParse(QuickCalories, out int cal) || cal <= 0) return;
-        _calorieService.QuickAdd(QuickName, cal, SelectedMealType);
+
+        double.TryParse(QuickProtein, out double p);
+        double.TryParse(QuickCarbs, out double c);
+        double.TryParse(QuickFat, out double f);
+
+        var entry = new CalorieEntry
+        {
+            Name = QuickName,
+            Calories = cal,
+            ProteinGrams = p,
+            CarbsGrams = c,
+            FatGrams = f,
+            MealType = SelectedMealType,
+            Method = EntryMethod.QuickAdd
+        };
+        _calorieService.AddEntry(entry);
+
         QuickName = string.Empty;
         QuickCalories = string.Empty;
+        QuickProtein = string.Empty;
+        QuickCarbs = string.Empty;
+        QuickFat = string.Empty;
         RefreshAll();
     }
 
@@ -160,6 +194,28 @@ public class CaloriesViewModel : BaseViewModel
     {
         _calorieService.RemoveEntry(entry.Id);
         RefreshAll();
+    }
+
+    private void DoClearScannedProduct()
+    {
+        ScannedProduct = null;
+        BarcodeText = string.Empty;
+        BarcodeStatus = string.Empty;
+        ServingsText = "1";
+    }
+
+    private void ToggleScanner()
+    {
+        IsScannerVisible = !IsScannerVisible;
+        OnPropertyChanged(nameof(ScannerButtonText));
+    }
+
+    public async void OnBarcodeDetected(string barcode)
+    {
+        IsScannerVisible = false;
+        OnPropertyChanged(nameof(ScannerButtonText));
+        BarcodeText = barcode;
+        await DoBarcodeLookup();
     }
 
     private async Task DoBarcodeLookup()

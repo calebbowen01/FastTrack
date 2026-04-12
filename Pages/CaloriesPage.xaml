@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:MyMauiApp.ViewModels"
              xmlns:models="clr-namespace:MyMauiApp.Models"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
              x:Class="MyMauiApp.Pages.CaloriesPage"
              x:DataType="vm:CaloriesViewModel"
              BackgroundColor="{StaticResource PageBackground}">
@@ -89,10 +90,29 @@
             <!-- Barcode Scanner Section -->
             <Label Text="📷 Scan Barcode" FontSize="17" FontAttributes="Bold"
                    TextColor="{StaticResource White}" />
+
+            <!-- Camera Scanner Toggle -->
+            <Button Text="{Binding ScannerButtonText}"
+                    Command="{Binding ToggleScannerCommand}"
+                    BackgroundColor="{StaticResource AccentCyan}"
+                    TextColor="{StaticResource Black}"
+                    FontAttributes="Bold" FontSize="14"
+                    CornerRadius="12" HeightRequest="44" />
+
+            <!-- Camera Preview -->
+            <Frame BackgroundColor="{StaticResource CardBackground}"
+                   CornerRadius="16" Padding="4" BorderColor="Transparent" HasShadow="False"
+                   IsVisible="{Binding IsScannerVisible}">
+                <zxing:CameraBarcodeReaderView x:Name="BarcodeReader"
+                    IsDetecting="{Binding IsScannerVisible}"
+                    HeightRequest="250"
+                    BarcodesDetected="BarcodeReader_BarcodesDetected" />
+            </Frame>
+
             <Frame BackgroundColor="{StaticResource CardBackground}"
                    CornerRadius="16" Padding="16" BorderColor="Transparent" HasShadow="False">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="Enter the barcode number from the product packaging"
+                    <Label Text="Or enter the barcode number manually"
                            FontSize="12" TextColor="{StaticResource Gray400}" />
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                         <Entry Placeholder="Barcode number (e.g. 5000159484695)"
@@ -152,6 +172,7 @@
                                         FontAttributes="Bold" CornerRadius="10"
                                         HeightRequest="40" />
                                 <Button Grid.Column="2" Text="Cancel"
+                                        Command="{Binding ClearScannedProductCommand}"
                                         BackgroundColor="{StaticResource CardBackground}"
                                         TextColor="{StaticResource Gray300}"
                                         CornerRadius="10" HeightRequest="40" />
@@ -184,6 +205,24 @@
                                 TextColor="{StaticResource Black}"
                                 FontAttributes="Bold" CornerRadius="10"
                                 HeightRequest="44" WidthRequest="80" />
+                    </Grid>
+                    <Label Text="Optional macros:" FontSize="11" TextColor="{StaticResource Gray500}" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Entry Placeholder="Protein (g)" Text="{Binding QuickProtein}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentBlue}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Entry Grid.Column="1" Placeholder="Carbs (g)" Text="{Binding QuickCarbs}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentOrange}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
+                        <Entry Grid.Column="2" Placeholder="Fat (g)" Text="{Binding QuickFat}"
+                               Keyboard="Numeric"
+                               PlaceholderColor="{StaticResource Gray500}"
+                               TextColor="{StaticResource AccentRed}"
+                               BackgroundColor="{StaticResource CardBackgroundAlt}" />
                     </Grid>
                 </VerticalStackLayout>
             </Frame>
@@ -244,6 +283,12 @@
                                         <Label.FormattedText>
                                             <FormattedString>
                                                 <Span Text="{Binding Calories, StringFormat='{0} kcal'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding ProteinGrams, StringFormat='P:{0:F0}g'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding CarbsGrams, StringFormat='C:{0:F0}g'}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding FatGrams, StringFormat='F:{0:F0}g'}" />
                                             </FormattedString>
                                         </Label.FormattedText>
                                     </Label>
@@ -337,17 +382,28 @@
                             <Frame BackgroundColor="{StaticResource CardBackground}"
                                    CornerRadius="10" Padding="12" Margin="0,3"
                                    BorderColor="Transparent" HasShadow="False">
-                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" RowSpacing="3">
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="3">
                                     <Label Text="{Binding Name}" FontSize="14" FontAttributes="Bold"
                                            TextColor="{StaticResource White}" />
                                     <Label Grid.Column="1"
                                            Text="{Binding Calories, StringFormat='{0} kcal'}"
                                            FontSize="14" TextColor="{StaticResource AccentOrange}"
                                            FontAttributes="Bold" />
-                                    <Label Grid.Row="1"
+                                    <Label Grid.Row="1" FontSize="11" TextColor="{StaticResource Gray400}">
+                                        <Label.FormattedText>
+                                            <FormattedString>
+                                                <Span Text="{Binding ProteinGrams, StringFormat='P:{0:F0}g'}" TextColor="{StaticResource AccentBlue}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding CarbsGrams, StringFormat='C:{0:F0}g'}" TextColor="{StaticResource AccentOrange}" />
+                                                <Span Text=" · " />
+                                                <Span Text="{Binding FatGrams, StringFormat='F:{0:F0}g'}" TextColor="{StaticResource AccentRed}" />
+                                            </FormattedString>
+                                        </Label.FormattedText>
+                                    </Label>
+                                    <Label Grid.Row="2"
                                            Text="{Binding MealType}" FontSize="11"
-                                           TextColor="{StaticResource Gray400}" />
-                                    <Label Grid.Row="1" Grid.Column="1"
+                                           TextColor="{StaticResource Gray500}" />
+                                    <Label Grid.Row="2" Grid.Column="1"
                                            Text="{Binding Timestamp, StringFormat='{0:h:mm tt}'}"
                                            FontSize="11" TextColor="{StaticResource Gray500}" />
                                 </Grid>
