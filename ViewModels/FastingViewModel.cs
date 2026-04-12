@@ -111,9 +111,9 @@ public class FastingViewModel : BaseViewModel
         StartTimer();
     }
 
-    public async void StopFast()
+    public void StopFast()
     {
-        var session = _fastingService.StopFast();
+        _fastingService.StopFast();
         StopTimer();
         RefreshAll();
     }
