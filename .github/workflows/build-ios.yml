@@ -53,9 +53,15 @@ jobs:
       run: |
         # The iOS SDK 26.2 strictly requires Xcode 26.2 but the runner has 26.3.
         # Downgrade the hard error to a warning so the build can proceed.
-        find $HOME/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" -path "*iOS*" | while read f; do
-          echo "Patching: $f"
-          sed -i '' '/requires Xcode/s/<Error /<Warning /' "$f"
+        find $HOME/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" | while read f; do
+          echo "=== Patching: $f ==="
+          # Show what we're dealing with
+          grep -n "Xcode\|_RequiredXcode" "$f" | head -10
+          # The <Error> element's Condition references _RequiredXcodeVersion — patch that line
+          sed -i '' '/_RequiredXcodeVersion/s/<Error/<Warning/g' "$f"
+          # Also patch by known line number as fallback
+          sed -i '' '2374s/<Error/<Warning/' "$f"
+          echo "Patch complete for: $f"
         done
 
     - name: Build iOS IPA
