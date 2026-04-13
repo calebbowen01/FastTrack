@@ -115,15 +115,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
-        path: |
-          *.log
-        ls -la bin/Release/net10.0-ios/ios-arm64/publish/ || true
-
-    - name: Upload IPA Artifact
-      uses: actions/upload-artifact@v5
-      with:
-        name: FastTrack-iOS
-        path: |
-          **/*.ipa
-          **/publish/*.app
-        if-no-files-found: warn
+        path: "*.log"
