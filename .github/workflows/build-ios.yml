@@ -99,7 +99,6 @@ jobs:
         dotnet publish \
           -f net10.0-ios \
           -c Release \
-          --no-restore \
           -p:ArchiveOnBuild=true \
           -p:RuntimeIdentifier=ios-arm64 \
           -p:CodesignKey="-" \
