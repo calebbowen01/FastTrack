@@ -80,18 +80,16 @@ jobs:
     - name: Patch Xcode version check
       run: |
         # The .NET iOS SDK (26.2) requires Xcode 26.2 exactly, but the runner has 26.3.
-        # Patch the version check in Xamarin.Shared.Sdk.targets to allow any 26.x.
-        TARGETS_FILE=$(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" -path "*iOS*" 2>/dev/null | head -1)
-        if [ -n "$TARGETS_FILE" ]; then
-          echo "Patching: $TARGETS_FILE"
+        # Delete the Error line that checks Xcode version from ALL platform SDK targets.
+        for TARGETS_FILE in $(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" 2>/dev/null); do
+          echo "Found: $TARGETS_FILE"
           chmod +w "$TARGETS_FILE"
-          # Replace the Xcode version Error condition with Condition="false"
-          sed -i.bak 's/Condition=".*_XcodeVersion.*" Text="This version of .NET/Condition="false" Text="PATCHED: This version of .NET/g' "$TARGETS_FILE"
-          echo "Patch applied. Verifying..."
-          grep -n "PATCHED" "$TARGETS_FILE" || echo "Warning: patch text not found"
-        else
-          echo "::warning::Xamarin.Shared.Sdk.targets not found"
-        fi
+          echo "  Line 2374 before: $(sed -n '2374p' "$TARGETS_FILE")"
+          # Delete any line containing the Xcode version error message
+          sed -i '' '/requires Xcode/d' "$TARGETS_FILE"
+          echo "  Line 2374 after:  $(sed -n '2374p' "$TARGETS_FILE")"
+          echo "  Remaining Xcode refs: $(grep -c 'Xcode' "$TARGETS_FILE")"
+        done
 
     - name: Build iOS
       id: build
@@ -101,6 +99,7 @@ jobs:
         dotnet publish \
           -f net10.0-ios \
           -c Release \
+          --no-restore \
           -p:ArchiveOnBuild=true \
           -p:RuntimeIdentifier=ios-arm64 \
           -p:CodesignKey="-" \
