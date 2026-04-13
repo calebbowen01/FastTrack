@@ -79,6 +79,7 @@ jobs:
 
     - name: Build iOS
       run: |
+        set -o pipefail
         dotnet publish \
           -f net10.0-ios \
           -c Release \
