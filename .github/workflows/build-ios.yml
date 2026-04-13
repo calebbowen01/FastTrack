@@ -15,18 +15,36 @@ jobs:
     steps:
     - uses: actions/checkout@v5
 
-    - name: Select Xcode
+    - name: Diagnose Xcode environment
       run: |
-        echo "=== Available Xcode installations ==="
-        ls -d /Applications/Xcode* 2>/dev/null || true
+        echo "::group::macOS info"
+        sw_vers
+        echo "::endgroup::"
+        echo "::group::Available Xcode installations"
+        ls -d /Applications/Xcode* 2>/dev/null || echo "None found"
+        echo "::endgroup::"
+        echo "::group::Default Xcode"
+        xcode-select -p
+        xcodebuild -version 2>/dev/null || true
+        echo "::endgroup::"
+        echo "::group::Available SDKs"
+        xcodebuild -showsdks 2>/dev/null || true
+        echo "::endgroup::"
 
-        # Select the latest Xcode 26.x (.NET 10 iOS SDK requires 26.x)
-        XCODE=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1)
+    - name: Select best Xcode
+      run: |
+        # Prefer Xcode 26.x (for .NET 10 / iOS 26 SDK), then fall back
+        XCODE=""
+        for pattern in "/Applications/Xcode_26*.app" "/Applications/Xcode_16*.app" "/Applications/Xcode.app"; do
+          MATCH=$(ls -d $pattern 2>/dev/null | sort -V | tail -1)
+          if [ -n "$MATCH" ] && [ -d "$MATCH/Contents/Developer" ]; then
+            XCODE="$MATCH"
+            break
+          fi
+        done
+
         if [ -z "$XCODE" ]; then
-          XCODE=$(ls -d /Applications/Xcode.app 2>/dev/null || echo "")
-        fi
-        if [ -z "$XCODE" ]; then
-          echo "::error::No Xcode installation found"
+          echo "::error::No usable Xcode found"
           exit 1
         fi
 
@@ -35,45 +53,8 @@ jobs:
         sudo xcodebuild -license accept 2>/dev/null || true
         sudo xcodebuild -runFirstLaunch 2>/dev/null || true
         xcodebuild -version
-
-        # Diagnose and repair missing platform SDKs
-        for PLAT in MacOSX iPhoneOS; do
-          SDKS_DIR="$XCODE/Contents/Developer/Platforms/${PLAT}.platform/Developer/SDKs"
-          echo "--- $PLAT platform ---"
-          ls -la "$SDKS_DIR" 2>/dev/null || echo "  Directory missing: $SDKS_DIR"
-
-          # If there's a versioned SDK but no generic symlink, create it
-          if [ -d "$SDKS_DIR" ]; then
-            GENERIC="${SDKS_DIR}/${PLAT}.sdk"
-            if [ ! -e "$GENERIC" ]; then
-              VERSIONED=$(ls -d "$SDKS_DIR"/${PLAT}[0-9]*.sdk 2>/dev/null | sort -V | tail -1)
-              if [ -n "$VERSIONED" ]; then
-                echo "  Creating symlink: ${PLAT}.sdk -> $(basename $VERSIONED)"
-                sudo ln -sf "$(basename $VERSIONED)" "$GENERIC"
-              fi
-            fi
-          fi
-        done
-
-        # Download missing platform SDKs if needed
-        if ! xcrun --sdk macosx --show-sdk-path 2>/dev/null; then
-          echo "macOS SDK not found - downloading platform..."
-          xcodebuild -downloadPlatform macOS 2>&1 || true
-        fi
-        if ! xcrun --sdk iphoneos --show-sdk-path 2>/dev/null; then
-          echo "iOS SDK not found - downloading platform..."
-          xcodebuild -downloadPlatform iOS 2>&1 || true
-        fi
-
-        echo "=== Final SDK verification ==="
-        echo "macOS SDK: $(xcrun --sdk macosx --show-sdk-path 2>/dev/null || echo 'NOT FOUND')"
         echo "iOS SDK: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'NOT FOUND')"
-        xcodebuild -showsdks 2>/dev/null | head -20 || true
-
-    - name: Pin to .NET 10 SDK
-      run: |
-        cp global.json.ci global.json
-        cat global.json
+        echo "macOS SDK: $(xcrun --sdk macosx --show-sdk-path 2>/dev/null || echo 'NOT FOUND')"
 
     - name: Setup .NET 10
       uses: actions/setup-dotnet@v5
@@ -81,23 +62,61 @@ jobs:
         dotnet-version: '10.0.x'
         dotnet-quality: 'preview'
 
-    - name: Verify SDK version
-      run: dotnet --version
-
-    - name: Install MAUI Workloads
+    - name: Configure SDK
       run: |
+        cp global.json.ci global.json
+        echo "--- .NET SDK ---"
+        dotnet --version
+        dotnet --list-sdks
+        echo "--- MAUI workload ---"
         dotnet workload install maui
-        dotnet workload update
+        dotnet workload list
+
+    - name: Restore packages
+      run: |
+        dotnet restore /p:TargetFramework=net10.0-ios 2>&1 | tee restore.log
+        echo "Restore exit code: $?"
 
     - name: Build iOS IPA
       run: |
-        dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false -p:ValidateXcodeVersion=false
+        dotnet publish \
+          -f net10.0-ios \
+          -c Release \
+          -p:ArchiveOnBuild=true \
+          -p:RuntimeIdentifier=ios-arm64 \
+          -p:CodesignKey="-" \
+          -p:CodesignProvision="" \
+          -p:EnableCodeSigning=false \
+          --verbosity detailed 2>&1 | tee build.log
 
-    - name: Find IPA
+    - name: Locate build output
+      if: always()
       run: |
-        find . -name "*.ipa" -o -name "*.app" | head -20
-        ls -la bin/Release/net10.0-ios/ || true
-        ls -la bin/Release/net10.0-ios/ios-arm64/ || true
+        echo "=== IPA files ==="
+        find . -name "*.ipa" 2>/dev/null | head -20
+        echo "=== .app bundles ==="
+        find . -name "*.app" -type d 2>/dev/null | head -20
+        echo "=== publish directory ==="
+        ls -laR bin/Release/net10.0-ios/ios-arm64/publish/ 2>/dev/null || echo "No publish output"
+        echo "=== Release directory ==="
+        ls -laR bin/Release/net10.0-ios/ 2>/dev/null | head -50 || echo "No Release output"
+
+    - name: Upload IPA artifact
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: FastTrack-iOS
+        path: |
+          **/*.ipa
+          bin/Release/net10.0-ios/ios-arm64/publish/
+
+    - name: Upload build logs (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: |
+          *.log
         ls -la bin/Release/net10.0-ios/ios-arm64/publish/ || true
 
     - name: Upload IPA Artifact
