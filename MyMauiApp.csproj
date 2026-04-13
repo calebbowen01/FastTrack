@@ -59,7 +59,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include=".github\scripts\patch_xcode_check.py" />
 	  <None Include=".github\workflows\build-ios.yml" />
 	</ItemGroup>
 
@@ -79,6 +78,10 @@
 
 	<ItemGroup Condition="$([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == 'v8.0'">
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include=".github\scripts\" />
 	</ItemGroup>
 
 </Project>
