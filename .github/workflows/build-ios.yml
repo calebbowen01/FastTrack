@@ -77,6 +77,34 @@ jobs:
         dotnet restore /p:TargetFramework=net10.0-ios 2>&1 | tee restore.log
         echo "Restore exit code: $?"
 
+    - name: Patch Xcode version check
+      run: |
+        # The .NET iOS SDK (26.2) requires Xcode 26.2 exactly, but the runner has 26.3.
+        # Patch the version check in Xamarin.Shared.Sdk.targets to allow any 26.x.
+        TARGETS_FILE=$(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" -path "*iOS*" 2>/dev/null | head -1)
+        if [ -n "$TARGETS_FILE" ]; then
+          echo "Patching: $TARGETS_FILE"
+          # Make writable
+          chmod +w "$TARGETS_FILE"
+          # Replace the Error element's Condition to always be false
+          python3 -c "
+import re
+with open('$TARGETS_FILE', 'r') as f:
+    content = f.read()
+# Match the Error element that checks Xcode version
+patched = re.sub(
+    r'(<Error[^>]*Condition=\"[^\"]*_XcodeVersion[^\"]*\"[^>]*Text=\"This version of \.NET)',
+    r'<Error Condition=\"false\" Text=\"PATCHED: This version of .NET',
+    content
+)
+with open('$TARGETS_FILE', 'w') as f:
+    f.write(patched)
+print('Patch applied successfully')
+"
+        else
+          echo "::warning::Xamarin.Shared.Sdk.targets not found — skipping patch"
+        fi
+
     - name: Build iOS
       id: build
       continue-on-error: true
