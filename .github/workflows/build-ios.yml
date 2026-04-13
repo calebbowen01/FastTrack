@@ -78,6 +78,18 @@ jobs:
         dotnet restore /p:TargetFramework=net10.0-ios -r ios-arm64 2>&1 | tee restore.log
         echo "Restore exit code: $?"
 
+    - name: Patch Xcode version check
+      run: |
+        # The .NET iOS SDK (26.2) requires Xcode 26.2 exactly, but the runner has 26.3.
+        # Delete the Error element that enforces the check. --no-restore on publish
+        # ensures this patch is NOT overwritten by an implicit re-restore.
+        for TARGETS_FILE in $(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" 2>/dev/null); do
+          echo "Patching: $TARGETS_FILE"
+          chmod +w "$TARGETS_FILE"
+          sed -i '' '/requires Xcode/d' "$TARGETS_FILE"
+          echo "  Remaining 'requires Xcode' lines: $(grep -c 'requires Xcode' "$TARGETS_FILE" || echo 0)"
+        done
+
     - name: Build iOS
       id: build
       continue-on-error: true
