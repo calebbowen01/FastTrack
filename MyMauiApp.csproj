@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
@@ -59,6 +59,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".github\scripts\patch_xcode_check.py" />
 	  <None Include=".github\workflows\build-ios.yml" />
 	</ItemGroup>
 

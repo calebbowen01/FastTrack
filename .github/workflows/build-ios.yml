@@ -50,38 +50,7 @@ jobs:
         dotnet workload update
 
     - name: Patch Xcode version check
-      run: |
-        # The iOS SDK 26.2 strictly requires Xcode 26.2 but the runner has 26.3.
-        # Replace all <Error> tasks with <Warning> in the SDK targets file so
-        # the Xcode version pre-flight check becomes non-fatal.
-        # NOTE: No heredocs, no pipe-to-while (subshell eats errors). Plain for-loop.
-        TARGETS=$(find $HOME/.dotnet/packs /usr/local/share/dotnet/packs 2>/dev/null -name "Xamarin.Shared.Sdk.targets" 2>/dev/null || true)
-        if [ -z "$TARGETS" ]; then
-          echo "::warning::No Xamarin.Shared.Sdk.targets found anywhere"
-          exit 0
-        fi
-        for TARGET in $TARGETS; do
-          echo "=== $TARGET ==="
-          ls -la "$TARGET"
-          chmod u+w "$TARGET" 2>/dev/null || sudo chmod u+w "$TARGET"
-          echo "  <Error> count before: $(grep -c '<Error' "$TARGET")"
-          python3 -c "
-import sys
-p=sys.argv[1]
-f=open(p,'r'); c=f.read(); f.close()
-n=c.count('<Error')
-c=c.replace('<Error','<Warning').replace('</Error>','</Warning>')
-f=open(p,'w'); f.write(c); f.close()
-print(f'  Replaced {n} <Error> elements')
-" "$TARGET"
-          echo "  <Error> count after:  $(grep -c '<Error' "$TARGET" || echo 0)"
-          echo "  <Warning> count after: $(grep -c '<Warning' "$TARGET" || echo 0)"
-          if grep -q '<Error' "$TARGET"; then
-            echo "::error::Patch FAILED for $TARGET"
-            exit 1
-          fi
-          echo "  ✅ Verified — zero <Error> elements remain"
-        done
+      run: python3 .github/scripts/patch_xcode_check.py
 
     - name: Build iOS IPA
       run: |
