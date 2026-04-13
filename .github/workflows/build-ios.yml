@@ -50,10 +50,26 @@ jobs:
         dotnet workload update
 
     - name: Patch Xcode version check
-      run: python3 .github/scripts/patch_xcode_check.py
+      run: |
+        python3 .github/scripts/patch_xcode_check.py
+        # Persist shim PATH for subsequent steps
+        SDK_DIR=$(ls -d $HOME/.dotnet/packs/Microsoft.iOS.Sdk.net10.0_* 2>/dev/null | head -1)
+        REQ=$(echo "$SDK_DIR" | grep -oE '_[0-9]+\.[0-9]+' | tr -d '_')
+        echo "SDK pack dir: $SDK_DIR"
+        echo "Required Xcode version: ${REQ:-unknown}"
+        if [ -n "$REQ" ]; then
+          REAL=$(which xcodebuild)
+          mkdir -p /tmp/shim
+          printf '#!/bin/bash\nif [ "$1" = "-version" ]; then\n  echo "Xcode %s"\n  echo "Build version 26B100"\n  exit 0\nfi\nexec "%s" "$@"\n' "$REQ" "$REAL" > /tmp/shim/xcodebuild
+          chmod +x /tmp/shim/xcodebuild
+          echo "PATH=/tmp/shim:$PATH" >> "$GITHUB_ENV"
+          echo "Shim created — will report Xcode $REQ"
+        fi
 
     - name: Build iOS IPA
       run: |
+        echo "xcodebuild -version reports:"
+        xcodebuild -version
         dotnet publish -f net10.0-ios -c Release -p:ArchiveOnBuild=true -p:RuntimeIdentifier=ios-arm64 -p:CodesignKey="-" -p:CodesignProvision="" -p:EnableCodeSigning=false
 
     - name: Find IPA
