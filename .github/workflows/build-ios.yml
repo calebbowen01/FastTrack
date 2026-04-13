@@ -74,22 +74,9 @@ jobs:
 
     - name: Restore packages
       run: |
-        dotnet restore /p:TargetFramework=net10.0-ios 2>&1 | tee restore.log
+        set -o pipefail
+        dotnet restore /p:TargetFramework=net10.0-ios -r ios-arm64 2>&1 | tee restore.log
         echo "Restore exit code: $?"
-
-    - name: Patch Xcode version check
-      run: |
-        # The .NET iOS SDK (26.2) requires Xcode 26.2 exactly, but the runner has 26.3.
-        # Delete the Error line that checks Xcode version from ALL platform SDK targets.
-        for TARGETS_FILE in $(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" 2>/dev/null); do
-          echo "Found: $TARGETS_FILE"
-          chmod +w "$TARGETS_FILE"
-          echo "  Line 2374 before: $(sed -n '2374p' "$TARGETS_FILE")"
-          # Delete any line containing the Xcode version error message
-          sed -i '' '/requires Xcode/d' "$TARGETS_FILE"
-          echo "  Line 2374 after:  $(sed -n '2374p' "$TARGETS_FILE")"
-          echo "  Remaining Xcode refs: $(grep -c 'Xcode' "$TARGETS_FILE")"
-        done
 
     - name: Build iOS
       id: build
@@ -103,6 +90,7 @@ jobs:
           -p:RuntimeIdentifier=ios-arm64 \
           -p:CodesignKey="-" \
           -p:_RequireCodeSigning=false \
+          --no-restore \
           --verbosity detailed 2>&1 | tee build.log
         echo "BUILD_EXIT=$?" >> "$GITHUB_ENV"
 

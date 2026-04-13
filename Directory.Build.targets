@@ -1,0 +1,8 @@
+<Project>
+  <!--
+    Override the Xcode‐version gate shipped in Microsoft.iOS.Sdk / Xamarin.Shared.Sdk.
+    The CI runner may have a newer Xcode than the SDK expects (e.g. 26.3 vs 26.2).
+    Making the target a no-op lets the build proceed.
+  -->
+  <Target Name="_CheckForUnsupportedXcodeVersion" />
+</Project>
