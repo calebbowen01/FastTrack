@@ -18,17 +18,34 @@ jobs:
     - name: Select Xcode
       run: |
         echo "Available Xcode versions:"
-        ls -d /Applications/Xcode* || true
-        # Select the latest Xcode 26.x available on the runner
-        XCODE=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1)
-        if [ -n "$XCODE" ]; then
-          sudo xcode-select -s "$XCODE/Contents/Developer"
-          echo "Selected: $XCODE"
-        else
-          echo "::error::No Xcode 26.x found. .NET 10 iOS SDK requires Xcode 26."
-          exit 1
+        ls -d /Applications/Xcode* 2>/dev/null || true
+        # Find a working Xcode 26.x (newest first) by checking the MacOSX SDK exists
+        SELECTED=""
+        for XCODE in $(ls -d /Applications/Xcode_26* 2>/dev/null | sort -Vr); do
+          SDK="$XCODE/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
+          if [ -d "$SDK" ] && ls "$SDK"/MacOSX*.sdk 1>/dev/null 2>&1; then
+            SELECTED="$XCODE"
+            echo "✓ $XCODE has MacOSX SDK"
+            break
+          else
+            echo "✗ $XCODE missing MacOSX SDK, skipping"
+          fi
+        done
+        if [ -z "$SELECTED" ]; then
+          # Fallback: try default Xcode
+          echo "No Xcode 26.x with MacOSX SDK found. Trying default Xcode..."
+          SELECTED=$(xcode-select -p 2>/dev/null | sed 's|/Contents/Developer||')
+          if [ ! -d "$SELECTED" ]; then
+            echo "::error::No working Xcode installation found."
+            ls -la /Applications/Xcode*/Contents/Developer/Platforms/ 2>/dev/null || true
+            exit 1
+          fi
         fi
+        sudo xcode-select -s "$SELECTED/Contents/Developer"
+        echo "Selected: $SELECTED"
         xcodebuild -version
+        echo "Available SDKs:"
+        xcodebuild -showsdks 2>/dev/null | head -20 || true
 
     - name: Pin to .NET 10 SDK
       run: |
