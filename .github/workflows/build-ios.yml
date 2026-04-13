@@ -85,8 +85,7 @@ jobs:
           -p:ArchiveOnBuild=true \
           -p:RuntimeIdentifier=ios-arm64 \
           -p:CodesignKey="-" \
-          -p:CodesignProvision="" \
-          -p:EnableCodeSigning=false \
+          -p:_RequireCodeSigning=false \
           --verbosity detailed 2>&1 | tee build.log
 
     - name: Locate build output
