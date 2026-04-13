@@ -17,34 +17,57 @@ jobs:
 
     - name: Select Xcode
       run: |
-        echo "Available Xcode versions:"
+        echo "=== Available Xcode installations ==="
         ls -d /Applications/Xcode* 2>/dev/null || true
-        # Find a working Xcode 26.x (newest first) by checking the MacOSX SDK exists
-        SELECTED=""
-        for XCODE in $(ls -d /Applications/Xcode_26* 2>/dev/null | sort -Vr); do
-          SDK="$XCODE/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
-          if [ -d "$SDK" ] && ls "$SDK"/MacOSX*.sdk 1>/dev/null 2>&1; then
-            SELECTED="$XCODE"
-            echo "✓ $XCODE has MacOSX SDK"
-            break
-          else
-            echo "✗ $XCODE missing MacOSX SDK, skipping"
+
+        # Select the latest Xcode 26.x (.NET 10 iOS SDK requires 26.x)
+        XCODE=$(ls -d /Applications/Xcode_26* 2>/dev/null | sort -V | tail -1)
+        if [ -z "$XCODE" ]; then
+          XCODE=$(ls -d /Applications/Xcode.app 2>/dev/null || echo "")
+        fi
+        if [ -z "$XCODE" ]; then
+          echo "::error::No Xcode installation found"
+          exit 1
+        fi
+
+        echo "Selected: $XCODE"
+        sudo xcode-select -s "$XCODE/Contents/Developer"
+        sudo xcodebuild -license accept 2>/dev/null || true
+        sudo xcodebuild -runFirstLaunch 2>/dev/null || true
+        xcodebuild -version
+
+        # Diagnose and repair missing platform SDKs
+        for PLAT in MacOSX iPhoneOS; do
+          SDKS_DIR="$XCODE/Contents/Developer/Platforms/${PLAT}.platform/Developer/SDKs"
+          echo "--- $PLAT platform ---"
+          ls -la "$SDKS_DIR" 2>/dev/null || echo "  Directory missing: $SDKS_DIR"
+
+          # If there's a versioned SDK but no generic symlink, create it
+          if [ -d "$SDKS_DIR" ]; then
+            GENERIC="${SDKS_DIR}/${PLAT}.sdk"
+            if [ ! -e "$GENERIC" ]; then
+              VERSIONED=$(ls -d "$SDKS_DIR"/${PLAT}[0-9]*.sdk 2>/dev/null | sort -V | tail -1)
+              if [ -n "$VERSIONED" ]; then
+                echo "  Creating symlink: ${PLAT}.sdk -> $(basename $VERSIONED)"
+                sudo ln -sf "$(basename $VERSIONED)" "$GENERIC"
+              fi
+            fi
           fi
         done
-        if [ -z "$SELECTED" ]; then
-          # Fallback: try default Xcode
-          echo "No Xcode 26.x with MacOSX SDK found. Trying default Xcode..."
-          SELECTED=$(xcode-select -p 2>/dev/null | sed 's|/Contents/Developer||')
-          if [ ! -d "$SELECTED" ]; then
-            echo "::error::No working Xcode installation found."
-            ls -la /Applications/Xcode*/Contents/Developer/Platforms/ 2>/dev/null || true
-            exit 1
-          fi
+
+        # Download missing platform SDKs if needed
+        if ! xcrun --sdk macosx --show-sdk-path 2>/dev/null; then
+          echo "macOS SDK not found - downloading platform..."
+          xcodebuild -downloadPlatform macOS 2>&1 || true
         fi
-        sudo xcode-select -s "$SELECTED/Contents/Developer"
-        echo "Selected: $SELECTED"
-        xcodebuild -version
-        echo "Available SDKs:"
+        if ! xcrun --sdk iphoneos --show-sdk-path 2>/dev/null; then
+          echo "iOS SDK not found - downloading platform..."
+          xcodebuild -downloadPlatform iOS 2>&1 || true
+        fi
+
+        echo "=== Final SDK verification ==="
+        echo "macOS SDK: $(xcrun --sdk macosx --show-sdk-path 2>/dev/null || echo 'NOT FOUND')"
+        echo "iOS SDK: $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || echo 'NOT FOUND')"
         xcodebuild -showsdks 2>/dev/null | head -20 || true
 
     - name: Pin to .NET 10 SDK
