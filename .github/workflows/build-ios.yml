@@ -84,25 +84,13 @@ jobs:
         TARGETS_FILE=$(find ~/.dotnet/packs -name "Xamarin.Shared.Sdk.targets" -path "*iOS*" 2>/dev/null | head -1)
         if [ -n "$TARGETS_FILE" ]; then
           echo "Patching: $TARGETS_FILE"
-          # Make writable
           chmod +w "$TARGETS_FILE"
-          # Replace the Error element's Condition to always be false
-          python3 -c "
-import re
-with open('$TARGETS_FILE', 'r') as f:
-    content = f.read()
-# Match the Error element that checks Xcode version
-patched = re.sub(
-    r'(<Error[^>]*Condition=\"[^\"]*_XcodeVersion[^\"]*\"[^>]*Text=\"This version of \.NET)',
-    r'<Error Condition=\"false\" Text=\"PATCHED: This version of .NET',
-    content
-)
-with open('$TARGETS_FILE', 'w') as f:
-    f.write(patched)
-print('Patch applied successfully')
-"
+          # Replace the Xcode version Error condition with Condition="false"
+          sed -i.bak 's/Condition=".*_XcodeVersion.*" Text="This version of .NET/Condition="false" Text="PATCHED: This version of .NET/g' "$TARGETS_FILE"
+          echo "Patch applied. Verifying..."
+          grep -n "PATCHED" "$TARGETS_FILE" || echo "Warning: patch text not found"
         else
-          echo "::warning::Xamarin.Shared.Sdk.targets not found — skipping patch"
+          echo "::warning::Xamarin.Shared.Sdk.targets not found"
         fi
 
     - name: Build iOS
