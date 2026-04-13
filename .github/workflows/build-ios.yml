@@ -95,11 +95,15 @@ jobs:
     - name: Show build errors
       if: steps.build.outcome == 'failure'
       run: |
-        echo "::error::Build failed. Last 100 lines of build log:"
-        tail -100 build.log
-        echo ""
-        echo "=== Error/warning lines ==="
-        grep -iE "(error |warning |fatal|failed)" build.log | tail -40
+        echo "## Build Failed" >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+        tail -80 build.log >> "$GITHUB_STEP_SUMMARY"
+        echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+        # Output each error as a separate annotation (visible via API)
+        grep -iE "(: error |NETSDK|fatal error)" build.log | tail -20 | while IFS= read -r line; do
+          echo "::error::$line"
+        done
 
     - name: Fail if build failed
       if: steps.build.outcome == 'failure'
